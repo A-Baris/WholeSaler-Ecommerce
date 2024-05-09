@@ -1,0 +1,55 @@
+﻿@model List<WholeSaler.Web.Models.ViewModels.ShoppingCartVM.ProductForCartVM>
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="row">
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Ürün Adı</th>
+                <th>Renk</th>
+                <th>Ürün fiyat</th>
+                <th>Sipariş Adet</th>
+
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prd in Model)
+            {
+
+                <tr>
+                    @if(prd.Images!=null)
+                    {
+                        <td style="width:40px;height:40px"><img src="~/images/products/@prd.Images" style="width:60;height:80px"></td>
+                    }
+                    @if (prd.Images == null)
+                    {
+                        <td style="width:40px;height:40px"></td>
+                    }
+                    
+                    <td>@prd.Name</td>
+                    <td>@prd.Colour</td>
+                    <td>@prd.UnitPrice TL</td>
+                    <td>@prd.Quantity</td>
+                    
+
+
+
+                </tr>
+
+
+
+
+            }
+        </tbody>
+    </table>
+
+</div>
+

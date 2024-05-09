@@ -1,0 +1,163 @@
+﻿@model List<WholeSaler.Web.Models.ViewModels.ShoppingCartVM.ProductForCartVM>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var cartId = ViewData["ShoppingCartId"] as string;
+    var userId = ViewData["UserId"] as string;
+    decimal? totalPriceOfProduct = 0;
+
+    var counter = 0;
+}
+
+<h1>Alışveriş Sepeti</h1>
+<div class="row">
+    <form id="productForm" asp-action="edit" asp-controller="shoppingcart" method="post">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Resim</th>
+                    <th>Ürün Adı</th>
+                    <th>Renk</th>
+                    <th>Birim Fiyat</th>
+                    <th>Adet</th>
+                    <th>Satıcı</th>
+                    <th>Toplam Fiyat</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var prd in Model)
+                {
+
+
+
+                    totalPriceOfProduct += prd.UnitPrice * prd.Quantity;
+
+                    <tr id="productRow">
+                        <td>
+                            @if(prd.Images == null || !prd.Images.Any())
+                            {
+                            <img src="~/images/exampleimage.jpg" alt="Denim Jeans" style="width:100%;height:100px">
+                            }
+                            else
+                            {
+                            <img src="~/images/products/@prd.Images[0].FileName" alt="Denim Jeans" style="width:100%;height:100px">
+                            }
+                            </td>
+                        <td id="productName">@prd.Name</td>
+                        <td id="productColour">@prd.Colour</td>
+                        <td id="productUnitPrice">@prd.UnitPrice TL</td>
+                        <td>
+                            <button type="button" id="btnMinus-{@prd.Id}" class="btn btn-sm btn-danger">-</button>
+                            <span id="prdQuantity-{@prd.Id}">@prd.Quantity</span>
+                            <button type="button" id="btnPlus-{@prd.Id}" class="btn btn-sm btn-primary">+</button>
+
+                        </td>
+                        <td id="productStoreStoreName">@prd.Store?.StoreName</td>
+
+                        <td id="totalProductPrice">@((prd.UnitPrice * prd.Quantity)) TL</td>
+                        @* <td><button type="button" class="btn btn-outline-info drop-product-btn" data-product-id="@prd.Id">Drop The Product</button></td> *@
+                        <td><a href="/ShoppingCart/DeleteTheProductInCart?cartId=@cartId&productId=@prd.Id" type="button" class="btn btn-outline-secondary"><p><span class="glyphicon glyphicon-trash"></span></p></a></td>
+
+                    </tr>
+                    <input type="hidden" id="quantityInput-{@prd.Id}" name="products[@counter].quantity" value="@prd.Quantity">
+                    <input type="hidden" name="Id" value="@cartId">
+                    <input type="hidden" name="UserId" value="@userId">
+                    <input type="hidden" name="SumOfSales" value="@prd.SumOfSales">
+                    <input type="hidden" name="store.storeId" value="@prd.Store?.StoreId">
+                    <input type="hidden" name="store.storeName" value="@prd.Store?.StoreName">
+                    <input type="hidden" name="products[@counter].Id" value="@prd.Id">
+                    
+                  
+
+                    counter++;
+
+
+
+                }
+            </tbody>
+        </table>
+    </form>
+    <div>
+        <div style="float:right"  id="totalAmount"><h6>Sepet Toplam Tutar : @totalPriceOfProduct TL</h6></div>     
+    </div>
+    <div>
+        <div style="float:right"> <a href="/Order/Create?cartId=@cartId&totalAmount=@totalPriceOfProduct.ToString()" class="btn btn-success">Sepeti Onayla</a></div>
+    </div>
+</div>
+
+
+
+<script>
+    var decreaseButtons = document.querySelectorAll('[id^="btnMinus-"]');
+    decreaseButtons.forEach(function (button) {
+        button.addEventListener('click', function (event) {
+            event.preventDefault(); // Formun otomatik gönderilmesini engelle
+            var productId = button.id.split('-')[1]; // Ürün Id'sini al
+            decreaseQuantity(productId); // Quantity değerini azalt
+            document.getElementById('productForm').submit(); // Formu gönder
+        });
+    });
+
+    // Arttırma butonu
+    var increaseButtons = document.querySelectorAll('[id^="btnPlus-"]');
+    increaseButtons.forEach(function (button) {
+        button.addEventListener('click', function (event) {
+            event.preventDefault(); // Formun otomatik gönderilmesini engelle
+            var productId = button.id.split('-')[1]; // Ürün Id'sini al
+            increaseQuantity(productId); // Quantity değerini artır
+            document.getElementById('productForm').submit(); // Formu gönder
+        });
+    });
+
+    function decreaseQuantity(productId) {
+        var quantityElement = document.getElementById('prdQuantity-' + productId);
+        var quantity = parseInt(quantityElement.textContent);
+        if (quantity > 1) {
+            quantity--;
+            quantityElement.textContent = quantity;
+            document.getElementById('quantityInput-' + productId).value = quantity; // Quantity değerini gizli input alanına güncelle
+        }
+    }
+
+    function increaseQuantity(productId) {
+        var quantityElement = document.getElementById('prdQuantity-' + productId);
+        var quantity = parseInt(quantityElement.textContent);
+        quantity++;
+        quantityElement.textContent = quantity;
+
+        document.getElementById('quantityInput-' + productId).value = quantity;
+        console.log(document.getElementById('quantityInput-' + productId).value);// Quantity değerini gizli input alanına güncelle
+    }
+    // $(document).ready(function () {
+    //     // Attach click event handler to all buttons with class 'drop-product-btn'
+    //     $('.drop-product-btn').click(function () {
+    //         // Retrieve product id from data-product-id attribute
+    //         var productId = $(this).data('product-id');
+    //         var cartId = '@cartId';
+           
+
+    //         // Send DELETE request to API endpoint
+    //         $.ajax({
+              
+    //             url: `https://localhost:7185/api/shoppingcart/deleteproductincart/${cartId}/${productId}`,
+    //             type: 'DELETE',
+    //             success: function (response) {
+    //                 // Handle success response here
+    //                 console.log('Product dropped successfully');
+    //                 // Optionally, you can reload the page or update the UI accordingly
+    //                 location.reload();
+    //             },
+    //             error: function (xhr, status, error) {
+    //                 // Handle error response here
+    //                 console.error('Error dropping product:', error);
+    //             }
+    //         });
+    //     });
+    // });
+
+
+    
+   
+
+</script>

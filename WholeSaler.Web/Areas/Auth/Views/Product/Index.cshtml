@@ -1,0 +1,113 @@
+﻿@model List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Store.MyStoreVM>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+    var categories = ViewBag.Categories;
+    var storeId = ViewData["storeId"];
+
+}
+
+<div class="col-md-12">
+   
+    <div id="categories" class="row" style="margin-bottom:5px;">
+        <div class="col-md-1">
+            <a class="btn btn-primary" asp-action="create" asp-controller="product" asp-area="auth" style="border-radius:50px;width:120px;height:40px;">Add Product</a>
+        </div>
+        <div class="col-md-1" style="margin-right:10px">
+            <a class="btn btn-outline-success" asp-area="auth" asp-controller="product"
+               asp-action="Index" asp-route-storeId="@storeId">Show All</a>
+        </div>
+        @if (categories != null)
+        {
+            @foreach (var item in categories as List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>)
+            {
+                <div class="col-md-1">
+                    <a class="btn btn-outline-success" asp-area="auth" asp-controller="Product"
+                       asp-action="Index" asp-route-storeId="@storeId" asp-route-categoryId="@item.Id">
+
+                        @item.Name
+                    </a>
+                </div>
+            }
+        }
+
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Resim</th>
+            <th>Ürün Adı</th>
+            <th>Renk</th>
+            <th>Birim Fiyat</th>
+            <th>Stock</th>
+            <th>Satış Miktarı</th>
+            <th>Toplam Ciro</th>
+            <th>Status</th>
+            <th>Update Status</th>
+            <th></th>
+         
+
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prd in Model)
+        {
+
+            <tr id="productRow">
+                <td>
+                    <div class="card-img" style="width:100px;height:100px">
+                        @if (prd.Images == null || !prd.Images.Any())
+                        {
+                            <img src="~/images/exampleimage.jpg" alt="Denim Jeans" style="width:100px;height:100px">
+                        }
+                        else
+                        {
+                            <div id="carousel-@prd.Id" class="carousel slide" data-interval="false">
+                                <div class="carousel-inner">
+                                    @foreach (var image in prd.Images)
+                                    {
+                                        <div class="carousel-item @(image == prd.Images.First()? "active" : "")">
+                                            <img src="~/images/products/@image.FileName" class="d-block w-100" alt="@image.FileName" style="width:100px;height:100px">
+                                        </div>
+                                    }
+                                </div>
+                                <a class="carousel-control-prev" href="#carousel-@prd.Id" role="button" data-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                                <a class="carousel-control-next" href="#carousel-@prd.Id" role="button" data-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </div>
+
+                        }
+                    </div>
+                </td>
+                <td id="productName">@prd.Name</td>
+                <td id="productColour">@prd.Colour</td>
+                <td id="productUnitPrice">@prd.UnitPrice TL</td>
+                <td id="productStock">@prd.Stock</td>
+                <td id="productSumOfSales">@prd.SumofSales</td>
+                <td>@(prd.SumofSales * prd.UnitPrice) TL</td>
+                <td id="productStatus">@prd.Status</td>
+                <td>
+                    <a class="btn btn-primary btn-sm" href="/auth/product/changeStatus?id=@prd.Id&statusCode=0">Active</a>
+              /
+                    <a class="btn btn-secondary btn-sm" href="/auth/product/changeStatus?id=@prd.Id&statusCode=1">Passive</a>
+                </td>
+                <td><a class="btn btn-outline-warning" href="/auth/product/edit/@prd.Id">Edit</a> <a class="btn btn-outline-danger" href="/auth/product/delete/@prd.Id">Delete</a></td>
+               
+
+
+
+
+            </tr>
+        }
+
+    </tbody>
+</table>
+

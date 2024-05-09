@@ -1,0 +1,258 @@
+﻿@model WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.ProductVM
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var userId = ViewData["uId"];
+    var visitorId = ViewData["visitorId"];
+    var returnUrl = ViewData["ReturnUrl"] as string;
+    var cartMessage = TempData["CartMessage"] as string;
+    var commentUrl = $"/product/detail?productId=${@Model.Id}" as string;
+
+}
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+@if (!string.IsNullOrEmpty(cartMessage))
+{
+    <div class="row justify-content-center">
+        <div id="messageDiv" class="col-md-6 alert alert-success">
+            <div class="d-flex justify-content-center align-items-center">
+                <p>@cartMessage</p>
+            </div>
+        </div>
+    </div>
+
+}
+
+<form asp-action="addtocart" asp-controller="shoppingcart" method="post">
+    <div class="col-md-12">
+        <div class="card mb-3">
+            <div class="row no-gutters">
+                <div class="col-md-4">
+                    <div class="card-img" style="margin-bottom:5px;margin-top:5px;margin-left:5px;height:300px">
+                        @if (Model.Images == null || !Model.Images.Any())
+                        {
+                            <div>
+                            <img src="~/images/exampleimage.jpg" alt="Denim Jeans" style="width:100%;height:100%">
+                            </div>
+                        }
+                        else
+                        {
+
+                            <div id="carouselExampleControls" class="carousel slide" data-interval="false">
+                                <div class="carousel-inner">
+                                    @foreach (var image in Model.Images)
+                                    {
+                                        <div class="carousel-item @(image == Model.Images.First()? "active" : "")">
+                                            <img src="~/images/products/@image.FileName" class="d-block w-100" alt="@image.FileName" style="width:100px;height:300px">
+                                        </div>
+                                    }
+                                </div>
+
+                            
+                                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                                    <i class="fas fa-angle-double-left" style="margin-right:80%;color:black"></i>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                              
+                                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                                    <i class="fas fa-angle-double-right" style="margin-left:80%;color:black"></i>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                               
+                           
+                            </div>
+                            
+                        }
+                    </div>
+                    <div class="row">
+                        @foreach (var image in Model.Images)
+                        {
+                            <div class="col-md-4">
+                                <div class="thumbnail" onclick="showImage('@image.FileName')">
+                                    <img src="~/images/products/@image.FileName" class="img-thumbnail" alt="@image.FileName" style="width:100px;height:100px">
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body" style="height:80%">
+                        <h5 class="card-title">@Model.Name</h5>
+                        <p class="card-text">@Model.Description</p>
+                        <p class="card-text"><small class="text-muted">@Model.Stock</small></p>
+                        <a href="" class="card-text"><small class="text-muted">@Model.Store.StoreName</small></a>
+                    </div>
+                    @if (userId == null)
+                    {
+                        <input name="UserId" value="@visitorId" hidden />
+                    }
+                    <input name="returnUrl" value="@returnUrl" hidden />
+
+                    <input name="UserId" value="@userId" hidden />
+                    <input name="Id" value="@Model.Id" hidden />
+                    <input name="Name" value="@Model.Name" hidden />
+                    <input name="colour" value="@Model.Colour" hidden />
+                    <input name="Description" value="@Model.Description" hidden />
+                    <input name="sumOfSales" value="@Model.SumOfSales" hidden />
+                    <input name="unitPrice" value="@Model.UnitPrice" hidden />
+                    <input type="type" name="quantity" value="1" hidden />
+                    <input name="stock" value="@Model.Stock" hidden />
+                    <input name="image" value="@Model.Images" hidden />
+                    <input name="store.storeName" value="@Model.Store?.StoreName" hidden />
+                    <input name="store.storeId" value="@Model.Store?.StoreId" hidden />
+                    <input name="category.categoryname" value="@Model.Category?.CategoryName" hidden />
+                    <input name="category.categoryId" value="@Model.Category?.CategoryId" hidden />
+                    <div class="text-center" id="card-footer">
+                        <button class="btn btn-success" type="submit">Add To Card</button>
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</form>
+
+
+
+
+
+<div class="col-md-8">
+
+
+    <form asp-action="CommentToProduct" asp-controller="product" method="post">
+        <div class="form-control">
+            <h6>New Comment</h6>
+            <br />
+            <input class="form-control" placeholder="Title" name="title" />
+            <textarea class="form-control" placeholder="Comment..." name="body"></textarea>
+            <input class="form-control" name="productId" value="@Model.Id" hidden />
+            @if (User.Identity.Name == null)
+            {
+                <div class="text-center" style="margin-top:5px">
+                    <a asp-controller="user" asp-action="login" asp-route-returnUrl="product/details?productId=@Model.Id" class="btn btn-primary">Login to Add Comment</a>
+
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center" style="margin-top:5px">
+                    <button class="btn btn-primary" type="submit">Add Comment</button>
+
+
+                </div>
+            }
+
+
+    </form>
+
+
+
+</div>
+
+
+
+<div style="margin-top:5px;">
+    <button id="showComment" class="btn btn-secondary" type="button">
+        Show Comments
+    </button>
+</div>
+
+<div class="col-md-12" style="margin-top:5px;">
+
+    <div id="myDiv" class="collapse" style="margin-top:5px">
+
+        <div id="commentsDiv">
+        </div>
+
+    </div>
+</div>
+
+
+
+<script>
+
+    function showImage(fileName) {
+        // Change the active class to the clicked thumbnail's carousel-item
+        var carouselItems = document.querySelectorAll('.carousel-item');
+        carouselItems.forEach(function (item) {
+            item.classList.remove('active');
+            if (item.querySelector('img').src.endsWith(fileName)) {
+                item.classList.add('active');
+            }
+        });
+    }
+
+    setTimeout(function () {
+        var messageDiv = document.getElementById('messageDiv');
+        if (messageDiv) {
+            messageDiv.style.display = 'none';
+        }
+    }, 3000);
+
+    $(document).ready(function () {
+        // Add click event listener to the button
+        $('#showComment').click(function () {
+            // Toggle the visibility of the div
+            $('#myDiv').collapse('toggle');
+
+            // Toggle the button text
+            var buttonText = $(this).text();
+            if (buttonText.trim() === "Show Comments") {
+                $(this).text("Hide Comments");
+            } else {
+                $(this).text("Show Comments");
+            }
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        var showCommentButton = document.getElementById('showComment');
+
+        showCommentButton.addEventListener('click', function () {
+
+            var prdId = '@Model.Id'
+            fetch(`https://localhost:7185/api/product/${prdId}`)
+                .then(response => response.json())
+                .then(data => {
+                    var commentsDiv = document.getElementById('commentsDiv');
+                    var commentsHTML = '';
+                    data.comments.forEach(comment => {
+
+                        var createdDate = new Date(comment.createdDate);
+
+                        var formattedDate = createdDate.toLocaleString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+
+
+                        var commentHTML = '<div>' +
+                            '<div class="card">' +
+                            '<div class="card-header">' +
+                            '<p style="color:blue">' + comment.username + '</p>' +
+                            '</div>' +
+                            '<div class="card-body">' +
+                            '<h5>' + comment.title + '</h5>' +
+                            '<p>' + comment.body + '</p>' +
+                            '<span>(' + formattedDate + ')</span>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+
+
+                        commentsHTML += commentHTML;
+                    });
+                    commentsDiv.innerHTML = commentsHTML;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+</script>

@@ -1,0 +1,101 @@
+﻿/*.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    margin: auto;
+    text-align: center;
+    font-family: arial;
+}
+
+.price {
+    color: grey;
+    font-size: 22px;
+    border-radius: 50%;*/ /* This creates a perfect circle */
+    /*border: 2px solid #333;
+    border-color: green;
+}
+
+.card button {
+    border: none;
+    outline: 0;
+    padding: 12px;
+    color: white;
+    background-color: #000;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    font-size: 18px;
+}
+
+    .card button:hover {
+        opacity: 0.7;
+    }
+.col-md-3 {
+    margin-top: 20px;
+}
+
+.input-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+    width: 5px;
+}
+
+
+
+    .product-image-container img {
+        width: 100%;*/ /* Görüntüyü kartın içine sığacak şekilde genişlet */
+        /*height: 50%;*/ /* Genişlik oranına göre yüksekliği otomatik ayarla */
+        /*object-fit: cover;*/ /* Görüntüyü keserek uygun şekilde yerleştir */
+    /*}*/
+
+
+.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    margin: auto;
+    text-align: center;
+    font-family: arial;
+    max-height: 500px; /* Kartların yüksekliği */
+    overflow: hidden; /* Kartın içeriğinin taşmasını engelle */
+}
+
+.price {
+    color: grey;
+    font-size: 22px;
+    border-radius: 50%; /* This creates a perfect circle */
+    border: 2px solid #333;
+    border-color: green;
+}
+
+.card button {
+    border: none;
+    outline: 0;
+    padding: 12px;
+    color: white;
+    background-color: #000;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    font-size: 18px;
+}
+
+    .card button:hover {
+        opacity: 0.7;
+    }
+
+.col-md-3 {
+    margin-top: 20px;
+}
+
+.input-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+    width: 5px;
+}
+
+.product-image-container img {
+    width: 100%; /* Görüntüyü kartın içine sığacak şekilde genişlet */
+    height: 100%; /* Kartın yüksekliğine tam olarak sığacak şekilde ayarla */
+    object-fit: cover; /* Görüntüyü keserek uygun şekilde yerleştir */
+}

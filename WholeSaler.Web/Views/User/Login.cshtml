@@ -1,0 +1,34 @@
+﻿@model WholeSaler.Web.Models.ViewModels.UserVM.LoginVM
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = ViewBag.ReturnUrl;
+}
+
+<h1>Login</h1>
+
+
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="login" asp-controller="user">
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input type="email" asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <input type="password" asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input name="returnUrl" value="@returnUrl" hidden/>
+                <input type="submit" value="Login" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+

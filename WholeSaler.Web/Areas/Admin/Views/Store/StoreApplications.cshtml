@@ -1,0 +1,58 @@
+﻿@model List<WholeSaler.Web.Areas.Admin.Models.ViewModels.Store.StoreVM>
+@{
+    ViewData["Title"] = "ConfirmStoreApplication";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>ConfirmStoreApplication</h1>
+
+<table class="table-bordered">
+
+    <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>City</th>
+            <th>District</th>
+            <th>Phone</th>
+            <th>Tax Number</th>
+            <th>User Id</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var store in Model)
+
+        {
+
+            
+
+
+            <tr>
+
+                <td>@store.Name</td>
+                <td>@store.Adress?.City</td>
+                <td>@store.Adress?.District</td>
+                <td>@store.Phone</td>
+                <td>@store.TaxNumber</td>
+                <td>@store.UserId</td>
+                <td>@store.AdminConfirmation</td>
+                <td>
+
+                    <a class="btn btn-outline-success" href="@Url.Action("approveapplication", "store", new { area = "admin",storeId=store.Id })" onclick="return confirmApproval()">Approve</a>
+                    <a class="btn btn-outline-danger" href="@Url.Action("rejectapplication", "store", new { area = "admin",storeId=store.Id })" onclick="return rejectApplication()">Reject</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<script>
+    function confirmApproval() {
+        return confirm("Are you sure you want to APPROVE this application?");
+    }
+    function rejectApplication() {
+        return confirm("Are you sure you want to REJECT this application?");
+    }
+</script>

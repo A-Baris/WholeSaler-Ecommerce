@@ -1,0 +1,21 @@
+﻿@model WholeSaler.Web.Areas.Admin.Models.ViewModels.Category.CategoryCreateVM
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var successMesage = TempData["success"] as string;
+}
+
+@if (successMesage != null)
+{
+    <h3>@successMesage</h3>
+}
+
+
+<form method="post" asp-action="create" asp-controller="category" asp-area="admin">
+    <div class="col-md-4">
+        <input class="form-control" name="Name" placeholder="Name"  />
+        <input class="form-control" name="Description" placeholder="Category Description" />
+    </div>
+    <button type="submit">Create</button>
+</form>
+

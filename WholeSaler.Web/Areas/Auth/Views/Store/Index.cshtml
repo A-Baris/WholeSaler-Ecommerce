@@ -1,0 +1,10 @@
+﻿@model List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Store.MyStoreVM>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+    var categories = ViewBag.Categories;
+    var storeId = ViewData["storeId"];
+
+}
+
+<h1>auth store index</h1>

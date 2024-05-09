@@ -1,0 +1,107 @@
+﻿@model WholeSaler.Web.Models.ViewModels.OrderVM.OrderCreateVM
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var cartId = ViewBag.CartId;
+    var CardTotalAmount = ViewBag.CartTotalAmount;
+    var userId = ViewData["userId"];
+}
+<div class="row">
+    <div class="col-md-12">
+        <form id="paymentForm" method="post">
+
+
+
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Adress Bilgileri</h4>
+                    <div class="border-2" style="border:solid;border-color:darksalmon">
+                        <div style="margin-left:5px;margin-right:5px;margin-bottom:5px;">
+                            <div class="form-group">
+                                <label asp-for="@Model.ShippingAddress.Header"></label>
+                                <input type="type" asp-for="@Model.ShippingAddress.Header" value=""  class="form-control" />
+                                <span asp-validation-for="@Model.ShippingAddress.Header" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.ShippingAddress.Country"></label>
+                                <input type="type" asp-for="@Model.ShippingAddress.Country" value="Türkiye" id="countryInput" class="form-control" />
+                                <span asp-validation-for="@Model.ShippingAddress.Country" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.ShippingAddress.City"></label>                             
+                                <input type="text" id="cityInput" asp-for="@Model.ShippingAddress.City" value="" class="form-control" />
+                                <span asp-validation-for="@Model.ShippingAddress.City" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.ShippingAddress.District"></label>
+                                <input type="type" asp-for="@Model.ShippingAddress.District" value="" id="districtInput" class="form-control" />
+                                <span asp-validation-for="@Model.ShippingAddress.District" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.ShippingAddress.Neighborhood"></label>
+                                <input type="type" asp-for="@Model.ShippingAddress.Neighborhood" value=""  class="form-control" />
+                                <span asp-validation-for="@Model.ShippingAddress.Neighborhood" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.ShippingAddress.ZipCode"></label>
+                                <input type="type" asp-for="@Model.ShippingAddress.ZipCode" value="" id="zipCodeInput" class="form-control" />
+                                <span asp-validation-for="@Model.ShippingAddress.ZipCode" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.ShippingAddress.ApartmentInfo"></label>
+                                <input type="type" asp-for="@Model.ShippingAddress.ApartmentInfo" value="" id="apartmentNoInput" class="form-control" />
+                                <span asp-validation-for="@Model.ShippingAddress.ApartmentInfo" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.ShippingAddress.Description"></label>
+                                <input type="type" asp-for="@Model.ShippingAddress.Description" value="" id="descriptionInput" class="form-control" />
+                                <span asp-validation-for="@Model.ShippingAddress.Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                       
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h4>Ödeme Bilgileri</h4>
+                    <div class="border-2" style="border:solid;border-color:green">
+                        <div style="margin-left:5px;margin-right:5px;margin-bottom:5px;">
+                            <input type="text" asp-for="@Model.UserId" value="@userId" hidden />
+                            <input type="text" asp-for="@Model.ShoppingCartId" value="@cartId" hidden />
+                            <div class="form-group">
+                                <label asp-for="@Model.OrderPayment.CardOwnerName"></label>
+                                <input id="cardOwnerName" type="text" asp-for="@Model.OrderPayment.CardOwnerName" value="" class="form-control" />
+                                <span asp-validation-for="@Model.OrderPayment.CardOwnerName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.OrderPayment.CardNumber"></label>
+                                <input id="cardNumber" type="text" asp-for="@Model.OrderPayment.CardNumber" value="" class="form-control" />
+                                <span asp-validation-for="@Model.OrderPayment.CardNumber" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.OrderPayment.CardExpirationDate"></label>
+                                <input id="cardExpirationDate" type="text" asp-for="@Model.OrderPayment.CardExpirationDate" value="" class="form-control" />
+                                <span asp-validation-for="@Model.OrderPayment.CardExpirationDate" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.OrderPayment.CardCvv"></label>
+                                <input id="cardCvv" type="text" asp-for="@Model.OrderPayment.CardCvv" value="" class="form-control" />
+                                <span asp-validation-for="@Model.OrderPayment.CardCvv" class="text-danger"></span>
+                              
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                    <div><h3 id="totalAmount">Ödenecek Toplam tutar: @CardTotalAmount TL</h3></div>
+                    <input type="hidden" asp-for="TotalOrderAmount" value="@CardTotalAmount">
+                    <button class="btn btn-outline-success" type="submit">Siparişi Tamamla</button>
+                    </div>
+                </div>
+                
+            </div>
+           
+        </form>
+    </div>
+</div>
+

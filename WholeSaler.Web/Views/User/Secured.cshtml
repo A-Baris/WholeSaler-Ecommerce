@@ -1,0 +1,23 @@
+﻿
+@{
+    ViewData["Title"] = "Secured";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Secured</h1>
+@using Microsoft.AspNetCore.Authentication
+
+@foreach (var claim in User.Claims)
+{
+    @claim.Type
+    @claim.Value
+    
+}
+<br />
+
+@foreach (var item in (await Context.AuthenticateAsync()).Properties.Items)
+{
+    @item.Key
+
+    @item.Value
+}

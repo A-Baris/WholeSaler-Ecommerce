@@ -1,0 +1,188 @@
+﻿@model List<WholeSaler.Web.Models.ViewModels.ShoppingCartVM.ProductForCartVM>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var userId = ViewData["uId"];
+    var visitorId = ViewData["visitorId"];
+    var cartMessage = TempData["CartMessage"] as string;
+    var noCartMessage = TempData["NoCartMessage"] as string;
+    var productNameMessage = TempData["productNameMessage"] as string;
+    var categories = ViewBag.Categories;
+    var storeId = ViewData["StoreId"] as string;
+    var storeInfo = ViewBag.StoreInfo as WholeSaler.Web.Areas.Admin.Models.ViewModels.Store.StoreVM;
+}
+<link href="~/css/mystoreCard.css" rel="stylesheet" />
+
+
+@if (!string.IsNullOrEmpty(cartMessage))
+{
+
+    <div class="row justify-content-center">
+        <div id="messageDiv" class="col-md-6 alert alert-success">
+            <div class="d-flex justify-content-center align-items-center">
+                <p>@cartMessage</p>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+<div id="messageContainer" class="message-container">
+    @if (!string.IsNullOrEmpty(productNameMessage))
+    {
+        <div class="alert alert-danger">
+            <div class="d-flex justify-content-center align-items-center">
+                <h6>@productNameMessage</h6>
+
+            </div>
+        </div>
+
+    }
+</div>
+<div id="messageContainer" class="message-container">
+    @if (!string.IsNullOrEmpty(noCartMessage))
+    {
+        <div class="alert alert-danger">
+            <div class="d-flex justify-content-center align-items-center">
+                <h6>@noCartMessage</h6>
+
+            </div>
+        </div>
+
+    }
+</div>
+
+<div>
+    <div class="text-md-center">
+        <form asp-action="index" asp-controller="store"  method="get">
+            <div>
+                <input placeholder="Search Product" name="productName" style="width:300px" /> 
+                <input name="storeId" value="@storeId" hidden/>
+                <button class="btn btn-secondary" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-md-2" style="border:solid;height:750px;">
+        <div>
+            <div>
+                <a asp-action="index" asp-controller="store" asp-route-storeId="@storeId">All Products</a>
+            </div>
+            @foreach (var category in categories as List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>)
+            {
+                <div>
+                    <a style="text-decoration:none" asp-action="index" asp-controller="store" asp-route-categoryName="@category.Name" asp-route-storeId="@storeId">@category.Name</a>
+                </div>
+            }
+        </div>
+
+
+    </div>
+    <div class="col-md-8">
+
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-3">
+                    <form asp-action="addtocart" asp-controller="shoppingcart" method="post">
+                        <div class="card">
+                            <div class="card-img">
+
+                                @if (item.Images == null || !item.Images.Any())
+                                {
+                                    <img src="~/images/exampleimage.jpg" alt="Denim Jeans" style="width:100%;height:100px">
+                                }
+                               else
+                                {
+
+                                    <div id="carouselExampleControls" class="carousel slide" data-interval="false">
+                                        <div class="carousel-inner">
+                                            @foreach (var image in item.Images)
+                                            {
+                                                <div class="carousel-item @(image == item.Images.First()? "active" : "")">
+                                                    <img src="~/images/products/@image.FileName" class="d-block w-100" alt="@image.FileName" style="width:100%;height:100px">
+                                                </div>
+
+                                            }
+                                        </div>
+                                        <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="sr-only">Previous</span>
+                                        </a>
+                                        <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="sr-only">Next</span>
+                                        </a>
+                                    </div>
+                                }
+
+                            </div>
+
+                            @if (userId == null)
+                            {
+                                <input name="UserId" value="@visitorId" hidden />
+                            }
+                            <input name="UserId" value="@userId" hidden />
+                            <input name="Id" value="@item.Id" hidden />
+                            <div>
+                                <a href="/store/index?storeId=@item.Store.StoreId" style="text-decoration:none">
+                                    <span style="font-size:small;color:black;">
+                                        @(item.Store?.StoreName ?? "Unknown")
+                                    </span>
+                                </a>
+                            </div>
+                            <a href="/product/details?productId=@item.Id" style="text-decoration:none;color:black;">
+                                <input name="Name" value="@item.Name" hidden />
+                                <h5>@item.Name</h5>
+                            </a>
+                            <input name="colour" value="@item.Colour" hidden />
+                            <input name="sumOfSales" value="@item.SumOfSales" hidden />
+                            <input name="unitPrice" value="@item.UnitPrice" hidden />
+                            <input name="stock" value="@item.Stock" hidden />
+                            <input name="image" value="@item.Images" hidden />
+                            <input name="store.storeName" value="@item.Store?.StoreName" hidden />
+                            <input name="store.storeId" value="@item.Store?.StoreId" hidden />
+                            <input name="category.categoryname" value="@item.Category?.CategoryName" hidden />
+                            <input name="category.categoryId" value="@item.Category?.CategoryId" hidden />
+                            <p class="price">@item.UnitPrice TL</p>
+                            <div class="input-container">
+                                <input type="type" name="quantity" value="1" hidden />
+                            </div>
+                            <button type="submit" class="addToCartButton">Add to Cart</button>
+
+
+                        </div>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-md-2" style="border:solid">
+        <h4>@storeInfo.Name</h4>
+        <h5>@storeInfo.Adress?.City</h5>
+        <h6>@storeInfo.Email</h6>
+    </div>
+</div>
+<script>
+    // Mesajı gizlemek için JavaScript fonksiyonu
+    setTimeout(function () {
+        var messageDiv = document.getElementById('messageDiv');
+        if (messageDiv) {
+            messageDiv.style.display = 'none';
+        }
+    }, 2000);
+    setTimeout(function () {
+        var messageDiv = document.getElementById('messageContainer');
+        if (messageDiv) {
+            messageDiv.style.display = 'none';
+        }
+    }, 2000);
+
+
+
+</script>
+

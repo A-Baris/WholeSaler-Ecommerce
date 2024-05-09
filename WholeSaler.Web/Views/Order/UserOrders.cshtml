@@ -1,0 +1,55 @@
+﻿@model List<WholeSaler.Web.Models.ViewModels.OrderVM.OrderInformationVM>
+@{
+    ViewData["Title"] = "UserOrders";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>UserOrders</h1>
+
+<div class="row">
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Durum</th>
+                <th>Sipariş No</th>
+                 <th>Sipariş Tarihi</th>
+                <th>Teslim Adresi</th>
+                <th>Sipariş Tutarı</th>
+                
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+
+                <tr >
+                    @if (order.Status == WholeSaler.Web.Models.Enums.EntityStatus.Passive)
+                    {
+                        <td><h6>@order.Status</h6></td>
+                    }
+                    @if (order.Status == WholeSaler.Web.Models.Enums.EntityStatus.Active)
+                    {
+                        <td style="color:green"><h5>@order.Status</h5></td>
+                    }
+                    
+                    <td>@order.Id</td>
+                    <td> @order.CreatedDate</td>
+                    <td> @order.ShippingAddress?.City/@order.ShippingAddress?.District</td>
+                    <td>@order.TotalOrderAmount TL</td>
+                    <td><a href="/order/orderdetail?shoppingCartId=@order.ShoppingCartId">Sipariş Detay</a></td>
+                    
+
+
+                </tr>
+
+
+
+
+            }
+        </tbody>
+    </table>
+
+</div>
+
