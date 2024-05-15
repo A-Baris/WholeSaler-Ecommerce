@@ -8,7 +8,9 @@ using WholeSaler.Entity.Entities;
 
 namespace WholeSaler.Business.AbstractServices
 {
-    public interface IProductService:IMongoDBRepo<Product>
+    public interface IRefreshTokenServiceWithRedis:IMongoDBWithRedis<RefreshToken>
     {
+        Task<RefreshToken> FindByToken(string token);
+        Task<RefreshToken> FindByUserId(string userId);
     }
 }

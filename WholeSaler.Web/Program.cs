@@ -9,6 +9,8 @@ using WholeSaler.Web.Settings;
 using FluentValidation.AspNetCore;
 using WholeSaler.Web.FluentValidation.Configs;
 using System.Net;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using WholeSaler.Web.CustomMiddleWares;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -20,24 +22,20 @@ builder.Services.AddIdentity<AppUser, AppRole>()
     mongoDbSettings.ConnectionString, mongoDbSettings.Name).AddDefaultTokenProviders();
 
 
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-  //.AddJwtBearer(options =>
-  //  {
-  //      options.TokenValidationParameters = new TokenValidationParameters
-  //      {
-  //          ValidateIssuer = true,
-  //          ValidateAudience = true,
-  //          ValidateLifetime = true,
-  //          ValidateIssuerSigningKey = true,
-  //          ValidIssuer = builder.Configuration["Jwt:Issuer"],
-  //          ValidAudience = builder.Configuration["Jwt:Audience"],
-  //          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
-  //      };
-  //  });
+
+//.AddJwtBearer(options =>
+//  {
+//      options.TokenValidationParameters = new TokenValidationParameters
+//      {
+//          ValidateIssuer = true,
+//          ValidateAudience = true,
+//          ValidateLifetime = true,
+//          ValidateIssuerSigningKey = true,
+//          ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//          ValidAudience = builder.Configuration["Jwt:Audience"],
+//          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
+//      };
+//  });
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddControllersWithViews().AddFluentValidation(x => x.RegisterValidatorsFromAssemblyContaining<Program>());
 
@@ -46,8 +44,9 @@ builder.Services.AddTransient(typeof(IValidationService<>), typeof(ValidationSer
 builder.Services.AddHttpClient();
 
 
-builder.Services.ConfigureApplicationCookie(x =>
-{
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie("WholeSalerCookie", x =>
+    {
     x.LoginPath = "/user/Login";
     x.AccessDeniedPath = "/user/Login";
     x.Cookie = new CookieBuilder
@@ -68,6 +67,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 var app = builder.Build();
+app.UseMiddleware<TokenMiddleware>();
 app.UseSession();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

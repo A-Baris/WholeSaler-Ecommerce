@@ -1,5 +1,7 @@
 ﻿using FluentValidation.Results;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
@@ -13,6 +15,7 @@ using WholeSaler.Web.Models.ViewModels;
 using WholeSaler.Web.Models.ViewModels.ShoppingCartVM;
 using WholeSaler.Web.Models.ViewModels.UserVM;
 using WholeSaler.Web.MongoIdentity;
+using static System.Net.WebRequestMethods;
 
 namespace WholeSaler.Web.Controllers
 {
@@ -45,7 +48,7 @@ namespace WholeSaler.Web.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Login(LoginVM loginVM,string returnUrl)
+        public async Task<IActionResult> Login(LoginVM loginVM, string returnUrl)
         {
 
             var errors = _loginValidation.GetValidationErrors(loginVM);
@@ -55,24 +58,48 @@ namespace WholeSaler.Web.Controllers
 
                 return View(loginVM);
             }
-          
+
 
 
             AppUser appUser = await _userManager.FindByEmailAsync(loginVM.Email);
             if (appUser != null)
             {
+                
                 var result = await _signInManager.PasswordSignInAsync(appUser, loginVM.Password, false, false);
-                if (!string.IsNullOrEmpty(returnUrl))
-                {
-                    return Redirect("~/"+returnUrl);
-                }
+              
 
                 if (result.Succeeded)
+
                 {
-                    
+                    var getAccessTokenUri = "https://localhost:7185/api/user/login";
+                    var jsonAccessToken = JsonConvert.SerializeObject(loginVM);
+                    var contentAccessToken = new StringContent(jsonAccessToken, System.Text.Encoding.UTF8, "application/json");
+                    var responseToken = await _httpClient.PostAsync(getAccessTokenUri, contentAccessToken);
+                    if (responseToken.IsSuccessStatusCode)
+                    {
+                      var tokenData =  await responseToken.Content.ReadFromJsonAsync<TokenVM>();
+                        Response.Cookies.Append("AccessToken", tokenData.AccessToken, new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Secure = true,
+                            Expires = tokenData.AccessTokenExpiration
+                        });
+
+                        Response.Cookies.Append("RefreshToken", tokenData.RefreshToken, new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Secure = true,
+                            Expires = tokenData.RefreshTokenExpiration
+                        });
+                    }
+                    if (!string.IsNullOrEmpty(returnUrl))
+                    {
+                        return Redirect("~/" + returnUrl);
+                    }
+
                     var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                     var user = await _userManager.FindByIdAsync(userId);
-              
+
                     var visitorId = Request.Cookies["visitor"];
                     var checkVisitorCartUri = $"https://localhost:7185/api/shoppingcart/getcart/{visitorId}";
 
@@ -103,7 +130,7 @@ namespace WholeSaler.Web.Controllers
                                     var resultUpdateUserCart = await _httpClient.PutAsync(userCartUpdate, contentCartUpdate);
                                     return RedirectToAction("Index", "Home");
                                 }
-                               
+
                             }
                             else
                             {
@@ -122,8 +149,8 @@ namespace WholeSaler.Web.Controllers
 
                     if (User.IsInRole("admin"))
                     {
-                       
-                        return RedirectToAction("index", "user", new {area="admin"});
+
+                        return RedirectToAction("index", "user", new { area = "admin" });
                     }
                     var username = User.Identity.Name;
                     TempData["LoginSuccess"] = $"Welcome {username}";
@@ -183,7 +210,9 @@ namespace WholeSaler.Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            
+            Response.Cookies.Delete("AccessToken");
+            Response.Cookies.Delete("RefreshToken");
+
 
             return RedirectToAction("index", "home");
         }

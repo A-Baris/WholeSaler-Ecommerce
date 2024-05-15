@@ -10,5 +10,6 @@ namespace WholeSaler.Business.AbstractServices
 {
     public interface IStoreServiceWithRedis:IMongoDBWithRedis<Store>
     {
+       
     }
 }

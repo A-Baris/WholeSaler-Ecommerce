@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WholeSaler.Api.DTOs.ShoppingCartDtos;
 using WholeSaler.Business.AbstractServices;
 using WholeSaler.Entity.Entities;
 
@@ -10,10 +13,12 @@ namespace WholeSaler.Api.Controllers
     public class ShoppingCartController : ControllerBase
     {
         private readonly IShoppingCartServiceWithRedis _cartServiceWithRedis;
+        private readonly IMapper _mapper;
 
-        public ShoppingCartController(IShoppingCartServiceWithRedis cartServiceWithRedis)
+        public ShoppingCartController(IShoppingCartServiceWithRedis cartServiceWithRedis,IMapper mapper)
         {
             _cartServiceWithRedis = cartServiceWithRedis;
+            _mapper = mapper;
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
@@ -40,6 +45,7 @@ namespace WholeSaler.Api.Controllers
             var result = await _cartServiceWithRedis.DeleteProductInCart(Id);
             return result == true ? Ok(result) : BadRequest(result);
         }
+    
         [HttpPut("edit")]
         public async Task<IActionResult> Edit(ShoppingCart shoppingCart)
         {
@@ -51,8 +57,9 @@ namespace WholeSaler.Api.Controllers
        
 
         [HttpPut("EditInCart")]
-        public async Task<IActionResult> EditInCart(ShoppingCart shoppingCart)
+        public async Task<IActionResult> EditInCart(ShoppingCartEditDto shoppingCart)
         {
+            var entity = _mapper.Map<ShoppingCart>(shoppingCart);
             var existingShoppingCart = await _cartServiceWithRedis.GetById(shoppingCart.Id); // Mevcut alışveriş sepetini al
             if (existingShoppingCart == null)
             {
@@ -117,6 +124,13 @@ namespace WholeSaler.Api.Controllers
                 return Ok(cart);
             }
             return BadRequest();
+        }
+        [HttpGet("GetProductsInOrder/{Id}")]
+        public async Task<IActionResult> GetProductsInOrder(string Id)
+        {
+            var products = await _cartServiceWithRedis.GetProductsInOrder(Id);
+            return Ok(products);
+
         }
 
     }

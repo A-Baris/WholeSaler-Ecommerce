@@ -10,5 +10,8 @@ namespace WholeSaler.Business.AbstractServices
 {
     public interface IOrderServiceWithRedis:IMongoDBWithRedis<Order>
     {
+        Task<List<SalesReport>> GetSalesReport(string storeId, DateTime startDate,DateTime endDate);
+
+
     }
 }

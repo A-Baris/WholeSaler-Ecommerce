@@ -9,7 +9,7 @@ namespace WholeSaler.Web.Utility
     {
         public static bool SetAuthorizationHeader(HttpClient _httpClient, HttpRequest request)
         {
-            var accessToken = request.Cookies["access_token"];
+            var accessToken = request.Cookies["AccessToken"];
             if (!string.IsNullOrEmpty(accessToken))
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);

@@ -1,7 +1,7 @@
 ﻿@model List<WholeSaler.Web.Areas.Admin.Models.ViewModels.User.RoleAssignVM>
 @{
     ViewData["Title"] = "AssignRole";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     var uId = ViewBag.Uid;
     var userInfo = ViewBag.UserInfo as WholeSaler.Web.MongoIdentity.AppUser;
 }

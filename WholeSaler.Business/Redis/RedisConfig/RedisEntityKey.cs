@@ -14,5 +14,6 @@ namespace WholeSaler.Business.Redis_Cache.RedisConfig
         public const string StoreKey = "Store-Cache";
         public const string ShoppingCartKey = "ShoppingCart-Cache";
         public const string OrderKey = "Order-Cache";
+        public const string RefreshTokenKey = "RefreshToken-Cache";
     }
 }

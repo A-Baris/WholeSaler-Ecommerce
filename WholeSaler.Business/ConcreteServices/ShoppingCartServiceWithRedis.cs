@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WholeSaler.Business.AbstractRepo;
 using WholeSaler.Business.AbstractServices;
 using WholeSaler.Business.ConcreteRepo;
+using WholeSaler.Business.Logger;
 using WholeSaler.Business.Redis_Cache.Abstracts;
 using WholeSaler.Entity.Entities;
 using WholeSaler.Entity.Entities.Enums;
@@ -81,6 +82,18 @@ namespace WholeSaler.Business.ConcreteServices
             var update = Builders<ShoppingCart>.Update.Set(x => x.Status, BaseStatus.Passive);
             var result = await _shoppingCartCollection.UpdateOneAsync(filter,update);
             return result != null  ? true:false;
+        }
+
+        public async Task<List<Product>> GetProductsInOrder(string storeId)
+        {
+            var filter = Builders<ShoppingCart>.Filter.Eq(sc => sc.Status, BaseStatus.Passive);
+            var shoppingCarts = _shoppingCartCollection.Find(filter).ToList();
+
+            var products = shoppingCarts.SelectMany(sc => sc.Products)
+                                        .Where(p => p.Store.StoreId == storeId)
+                                        .ToList();
+
+            return products;
         }
     }
 }

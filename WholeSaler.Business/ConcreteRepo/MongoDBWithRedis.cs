@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WholeSaler.Business.AbstractRepo;
+using WholeSaler.Business.Logger;
 using WholeSaler.Business.Redis_Cache.Abstracts;
 using WholeSaler.Entity.Entities;
 
@@ -13,66 +14,107 @@ namespace WholeSaler.Business.ConcreteRepo
     {
         private readonly IRedis_Cache<T> _redis;
         private readonly IMongoDBRepo<T> _mongoDB;
+        
 
         public MongoDBWithRedis(IRedis_Cache<T> redis,IMongoDBRepo<T> mongoDB)
         {
             _redis = redis;
             _mongoDB = mongoDB;
+        
         }
         public async Task<bool> Delete(string id)
         {
-            await _mongoDB.Delete(id);
-            await _redis.Delete(id);
-            return true;
+           
+            bool mongoResult = await _mongoDB.Delete(id);
+            bool redisResult = await _redis.Delete(id);
+            if(mongoResult == true && redisResult == true)
+            {
+                return true;
+            }
+            return false;
+         
+
+
+
         }
 
         public async Task<IEnumerable<T>> GetAll()
         {
-            try
-            {
+           
                 var cacheEntities = await _redis.GetAll();
                 if (cacheEntities != null && cacheEntities.Any())
                 {
-                    if (cacheEntities.Any())
-                    {
-                        return cacheEntities;
-                    }
+                       return cacheEntities;
                 }
+                else
+                {
                 return await _mongoDB.GetAllAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
+                }
+            
+         
 
 
         }
 
         public async Task<T> GetById(string id)
         {
-           var entity = await _redis.GetById(id);
-            return entity !=null ? entity : await _mongoDB.GetAsync(id);
+          
+            var redisEntity = await _redis.GetById(id);
+            if (redisEntity != null)
+            {
+                return redisEntity;
+            }
+            if(redisEntity == null)
+            {
+                var mongoDbEntity = await _mongoDB.GetAsync(id);
+                return mongoDbEntity;
+            }
+            return null;
+            
+            
+           
+          
         }
 
         public async Task<T> Create(T entity)
         {
-            await _mongoDB.Create(entity);
-            await _redis.SetEntity(entity);
-            return entity;
+            var mongoDbResult = await _mongoDB.Create(entity);
+            var redisResult = await _redis.SetEntity(entity);
+            if (mongoDbResult != null && redisResult != null)
+            {
+                return entity;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public async Task<T> Update(string updatedId, T newEntity)
         {
-            await _mongoDB.Update(newEntity);
-            await _redis.Update(updatedId, newEntity);
-            return newEntity;
+            var mongoDbResult = await _mongoDB.Update(newEntity);
+            var redisResult = await _redis.Update(updatedId, newEntity);
+            if (mongoDbResult!=null && redisResult!=null)
+            {
+                return newEntity;
+            }
+            else
+            {
+                return null;
+            }
         }
         public async Task<bool> ChangeStatusOfEntity(string id, int statusCode)
         {
-            await _mongoDB.ChangeStatusOfEntity(id, statusCode);
-            await _redis.ChangeStatusOfEntity(id, statusCode);
-            return true;
+           var mongoDbResult = await _mongoDB.ChangeStatusOfEntity(id, statusCode);
+           var redisResult = await _redis.ChangeStatusOfEntity(id, statusCode);
+            if (mongoDbResult && redisResult) 
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

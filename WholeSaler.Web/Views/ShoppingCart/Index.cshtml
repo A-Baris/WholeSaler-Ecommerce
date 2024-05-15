@@ -11,7 +11,7 @@
 
 <h1>Alışveriş Sepeti</h1>
 <div class="row">
-    <form id="productForm" asp-action="edit" asp-controller="shoppingcart" method="post">
+    <form id="productForm" asp-action="edit" asp-controller="shoppingcart" method="post" enctype="multipart/form-data">
         <table class="table">
             <thead>
                 <tr>
@@ -82,7 +82,11 @@
         <div style="float:right"  id="totalAmount"><h6>Sepet Toplam Tutar : @totalPriceOfProduct TL</h6></div>     
     </div>
     <div>
-        <div style="float:right"> <a href="/Order/Create?cartId=@cartId&totalAmount=@totalPriceOfProduct.ToString()" class="btn btn-success">Sepeti Onayla</a></div>
+  
+        <div style="float:right">
+            @* <a href="/Order/Create?cartId=@cartId&totalAmount=@totalPriceOfProduct.ToString()" class="btn btn-success">Sepeti Onayla</a> *@
+        <a asp-controller="Order" asp-action="Create" asp-route-cartId="@cartId" asp-route-totalAmount="@totalPriceOfProduct.ToString()" class="btn btn-success">Sepeti Onayla</a>
+        </div>
     </div>
 </div>
 
@@ -129,32 +133,6 @@
         document.getElementById('quantityInput-' + productId).value = quantity;
         console.log(document.getElementById('quantityInput-' + productId).value);// Quantity değerini gizli input alanına güncelle
     }
-    // $(document).ready(function () {
-    //     // Attach click event handler to all buttons with class 'drop-product-btn'
-    //     $('.drop-product-btn').click(function () {
-    //         // Retrieve product id from data-product-id attribute
-    //         var productId = $(this).data('product-id');
-    //         var cartId = '@cartId';
-           
-
-    //         // Send DELETE request to API endpoint
-    //         $.ajax({
-              
-    //             url: `https://localhost:7185/api/shoppingcart/deleteproductincart/${cartId}/${productId}`,
-    //             type: 'DELETE',
-    //             success: function (response) {
-    //                 // Handle success response here
-    //                 console.log('Product dropped successfully');
-    //                 // Optionally, you can reload the page or update the UI accordingly
-    //                 location.reload();
-    //             },
-    //             error: function (xhr, status, error) {
-    //                 // Handle error response here
-    //                 console.error('Error dropping product:', error);
-    //             }
-    //         });
-    //     });
-    // });
 
 
     

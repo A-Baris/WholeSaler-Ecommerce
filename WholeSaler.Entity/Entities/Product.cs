@@ -13,8 +13,8 @@ namespace WholeSaler.Entity.Entities
 
         public string? Name { get; set; }
         public string? Colour { get; set; }
-        public decimal? Quantity { get; set; }
-        public decimal? UnitPrice { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
         public decimal? Stock { get; set; }
         public int SumOfSales { get; set; }
         public List<Comment>? Comments { get; set; }

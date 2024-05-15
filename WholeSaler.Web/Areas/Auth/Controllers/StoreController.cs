@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
@@ -40,12 +41,45 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
            
             return View();
         }
- 
 
+        [HttpGet]
+        public async Task<IActionResult> SalesReport(DateTime startDate, DateTime? endDate)
+        {
 
+            if (endDate == null)
+            {
+                endDate = DateTime.Now;
+            }
+          
 
-        
+            var userId= HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+           var user = await _userManager.FindByIdAsync(userId);
+            var getSalesReportUri = $"https://localhost:7185/api/order/SalesReport/{user.StoreId}/{startDate}/{endDate}";
+            var salesReport = await _httpClient.GetAsync(getSalesReportUri);
+            if (salesReport.IsSuccessStatusCode) 
+            { 
+            var jsonReport = await salesReport.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<List<SalesReportVM>>(jsonReport);
+                if (data.Count > 0 && data.Any())
+                {
+                    return View(data);
+                }
+                else 
+                {
+                    TempData["NotFoundMessage"] = "Data was not found in requested dates";
+                    return View(data);
+                }
        
+            }
+            
+            return View();
+        }
+
+
+
+
+
+
         #region mystore
         //public async Task<IActionResult> MyStore(string storeId)
         //{

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -8,7 +9,9 @@ using System.Text;
 using WholeSaler.Api.DTOs;
 using WholeSaler.Api.Models.Jwt;
 using WholeSaler.Business.AbstractServices;
+using WholeSaler.Business.TokenServices.Abstract;
 using WholeSaler.Entity.Entities;
+using WholeSaler.Entity.Entities.MongoIdentity;
 
 namespace WholeSaler.Api.Controllers
 {
@@ -17,11 +20,15 @@ namespace WholeSaler.Api.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserServiceWithRedis _userService;
+        private readonly ITokenService _tokenService;
+        private readonly UserManager<AppUser> _userManager;
         private readonly JwtSetting _jwtSetting;
 
-        public UserController(IUserServiceWithRedis userService, IOptions<JwtSetting> jwtSetting)
+        public UserController(IUserServiceWithRedis userService, IOptions<JwtSetting> jwtSetting,ITokenService tokenService,UserManager<AppUser> userManager)
         {
             _userService = userService;
+         _tokenService = tokenService;
+           _userManager = userManager;
             _jwtSetting = jwtSetting.Value;
         }
         //[HttpPost("login")]
@@ -32,15 +39,15 @@ namespace WholeSaler.Api.Controllers
         //}
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserLoginDTO user)
+        public async Task<IActionResult> Login(UserLoginDTO loginDto)
         {
-            var result = await _userService.AuthenticateUser(user.Username, user.Password);
-            if (result == null)
-            {
-                return BadRequest(result);
-            }
-            var token = GenerateNewToken(result);
-            return Ok(token);
+           
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            if (user == null) { return BadRequest(); }
+           var userTokens = await _tokenService.CreateToken(user);
+
+           
+            return Ok(userTokens);
         }
         [HttpPost]
         public async Task<IActionResult> Create(User user)
@@ -50,38 +57,16 @@ namespace WholeSaler.Api.Controllers
 
         }
 
-        private string GenerateNewToken(User vm)
+        [HttpGet("refresh-token/{refreshToken}")]
+        public async Task<IActionResult> RefreshToken(string refreshToken)
         {
-            if (_jwtSetting.Key == null) { throw new Exception("Jwt settings can not be null"); }
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.Key));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var claimArray = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, vm.Username!),
-        new Claim(ClaimTypes.Email, vm.Email!),
-        new Claim(ClaimTypes.NameIdentifier, vm.Id!)
-    };
-
-          
-            //if (vm.Roles != null && vm.Roles.Any())
-            //{
-            //    foreach (var role in vm.Roles)
-            //    {
-            //        claimArray.Add(new Claim(ClaimTypes.Role, role));
-            //    }
-            //}
-
-            if (vm.StoreId != null)
+            var response = await _tokenService.RequestTokenByRefresh(refreshToken);
+            if (response == null)
             {
-                claimArray.Add(new Claim(ClaimTypes.GroupSid, vm.StoreId));
+                return Unauthorized("Invalid or expired refresh token.");
             }
 
-            var token = new JwtSecurityToken(_jwtSetting.Issuer, _jwtSetting.Audience,
-                claimArray,
-                expires: DateTime.Now.AddHours(12),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return Ok(response);
         }
     }
 }

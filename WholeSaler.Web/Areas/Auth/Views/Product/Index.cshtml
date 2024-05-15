@@ -10,10 +10,10 @@
 <div class="col-md-12">
    
     <div id="categories" class="row" style="margin-bottom:5px;">
-        <div class="col-md-1">
+       
             <a class="btn btn-primary" asp-action="create" asp-controller="product" asp-area="auth" style="border-radius:50px;width:120px;height:40px;">Add Product</a>
-        </div>
-        <div class="col-md-1" style="margin-right:10px">
+        
+        <div class="col-md-1" style="margin-left:5px">
             <a class="btn btn-outline-success" asp-area="auth" asp-controller="product"
                asp-action="Index" asp-route-storeId="@storeId">Show All</a>
         </div>
@@ -34,6 +34,9 @@
     </div>
 </div>
 
+<a asp-controller="product" asp-action="index">List Best Selling </a>
+<br />
+<a asp-controller="product" asp-action="index" asp-route-ascending="ascending">List Least Selling  </a>
 <table class="table">
     <thead>
         <tr>
@@ -87,13 +90,23 @@
                         }
                     </div>
                 </td>
-                <td id="productName">@prd.Name</td>
+                <td id="productName"><a asp-action="previewProduct" asp-controller="product" asp-area="auth" asp-route-id="@prd.Id">@prd.Name</a></td>
                 <td id="productColour">@prd.Colour</td>
                 <td id="productUnitPrice">@prd.UnitPrice TL</td>
                 <td id="productStock">@prd.Stock</td>
                 <td id="productSumOfSales">@prd.SumofSales</td>
                 <td>@(prd.SumofSales * prd.UnitPrice) TL</td>
-                <td id="productStatus">@prd.Status</td>
+                <td id="productStatus">
+                    @if (prd.Status == 0)
+                    {
+                        <p style="color:green">@prd.Status</p>
+                    }
+                    else
+                    {
+                        <p style="color:red">@prd.Status</p>
+                    }
+
+                </td>
                 <td>
                     <a class="btn btn-primary btn-sm" href="/auth/product/changeStatus?id=@prd.Id&statusCode=0">Active</a>
               /

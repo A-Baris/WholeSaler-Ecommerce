@@ -14,5 +14,6 @@ namespace WholeSaler.Business.AbstractServices
         Task<ShoppingCart> GetCartForUser(string userId);
         Task<Product> CheckProductInCart(string cartId, string productId);
         Task<bool> SetPassiveStatusOfShoppingCart(string cartId);
+        Task<List<Product>> GetProductsInOrder(string storeId);
     }
 }

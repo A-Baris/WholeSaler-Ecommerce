@@ -3,6 +3,9 @@ using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product;
 using Newtonsoft.Json;
 using System.Security.Claims;
 using WholeSaler.Web.Models.ViewModels.Product;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using WholeSaler.Web.Utility;
 
 namespace WholeSaler.Web.Controllers
 {
@@ -34,6 +37,7 @@ namespace WholeSaler.Web.Controllers
             ViewData["uId"] =userId;
             ViewData["visitorId"]=visitorId;
             var getProductUri = $"https://localhost:7185/api/product/{productId}";
+            SetAuthHeader.SetAuthorizationHeader(_httpClient,Request);
             var response = await _httpClient.GetAsync(getProductUri);
             if (response.IsSuccessStatusCode)
             {

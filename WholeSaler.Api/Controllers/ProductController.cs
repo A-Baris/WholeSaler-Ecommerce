@@ -15,41 +15,77 @@ namespace WholeSaler.Api.Controllers
     {
         private readonly IProductServiceWithRedis _productService;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
+        private string controllerName = "ProductController";
 
-        public ProductController(IProductServiceWithRedis productService,IMapper mapper)
+        public ProductController(IProductServiceWithRedis productService,IMapper mapper,ILogger<ProductController> logger)
         {
             _productService = productService;
             _mapper = mapper;
+            _logger = logger;
         }
-       
-     
-        [HttpGet]
 
+
+        [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-
-            var products = await _productService.GetAll();
-            return Ok(products);
-
-
+            try
+            {
+                var products = await _productService.GetAll();
+                return Ok(products);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError($"#{controllerName} GetAll - {ex.Message}", ex);
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"#{controllerName} GetAll - {ex.Message}", ex);
+                return StatusCode(500, ex.Message);
+            }
         }
+        [Authorize(Roles= "assistant")]
+      
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(string id)
         {
-
-            var product = await _productService.GetById(id);
-            return Ok(product);
-
+            try
+            {
+                var product = await _productService.GetById(id);
+                return product!=null ? Ok(product) : NotFound();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError($"#{controllerName} GetOne - {ex.Message}", ex);
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"#{controllerName} GetOne - {ex.Message}", ex);
+                return StatusCode(500, ex.Message);
+            }
         }
+
         [HttpPost]
-        public async Task<IActionResult> Create(ProductCreateDTO product )
+        public async Task<IActionResult> Create(ProductCreateDTO product)
         {
-
-           var newProduct = _mapper.Map<Product>(product);
-            await _productService.Create(newProduct);
-            return Ok(product);
-
-
+            try
+            {
+                var newProduct = _mapper.Map<Product>(product);
+                await _productService.Create(newProduct);
+                return Ok(product);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError($"#{controllerName} Create - {ex.Message}", ex);
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"#{controllerName} Create - {ex.Message}", ex);
+                return StatusCode(500, ex.Message);
+            }
         }
         [HttpPut("edit")]
         public async Task<IActionResult> Update(Product product)
@@ -72,6 +108,10 @@ namespace WholeSaler.Api.Controllers
         public async Task<IActionResult> Update(Comment comment,string productId)
         {
             var product = await _productService.GetById(productId);
+           if(product.Comments ==null)
+            {
+                product.Comments = new List<Comment>();           
+            }
             product.Comments.Add(comment);
             await _productService.Update(product.Id, product);
             return Ok("Updated");

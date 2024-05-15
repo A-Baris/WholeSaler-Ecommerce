@@ -11,6 +11,7 @@ namespace WholeSaler.Entity.Entities
     {
         public string UserId { get; set; }
         public string ShoppingCartId { get; set; }
+        public List<Product>? Products { get; set; }
         public decimal TotalOrderAmount { get; set; }
         public ShippingAddress ShippingAddress { get; set; }
         public OrderPayment OrderPayment { get; set; }

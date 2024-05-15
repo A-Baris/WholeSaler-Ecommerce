@@ -5,9 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using WholeSaler.Business.Logger;
 using WholeSaler.Business.Redis_Cache.Abstracts;
 using WholeSaler.Entity.Entities;
 using WholeSaler.Entity.Entities.Enums;
+using ZstdSharp;
 
 namespace WholeSaler.Business.Redis.Concrete
 {
@@ -16,61 +18,109 @@ namespace WholeSaler.Business.Redis.Concrete
         private readonly ConnectionMultiplexer _redis;
         private readonly StackExchange.Redis.IDatabase _database;
         private readonly string _entityKey;
-        public Redis_Cache(int dbNo, string entityKey, string url)
+        private readonly ILogger _logger;
+
+        public Redis_Cache(int dbNo, string entityKey, string url,ILogger logger)
         {
             _redis = ConnectionMultiplexer.Connect(url);
             _database = _redis.GetDatabase(dbNo);
             _entityKey = entityKey;
-
+            _logger = logger;
         }
         public async Task<bool> Delete(string id)
         {
-            if(await _database.HashDeleteAsync(_entityKey, id))
+            try
             {
-                return true;
+                if (await _database.HashDeleteAsync(_entityKey, id))
+                {
+                    return true;
+                }
+                return false;
             }
-            return false;
+            catch (Exception ex)
+            {
+                _logger.LogError($"#Redis-Cache deleting entity with ID {id}.", ex);
+                return false;
+            }
         }
 
         public async Task<IEnumerable<T>> GetAll()
         {
-            var cacheEntity = await _database.HashGetAllAsync(_entityKey);
-            var entityList = cacheEntity.Select(item => JsonSerializer.Deserialize<T>(item.Value)).ToList();
-            return entityList;
+            try
+            {
+                var cacheEntity = await _database.HashGetAllAsync(_entityKey);
+                var entityList = cacheEntity.Select(item => JsonSerializer.Deserialize<T>(item.Value)).ToList();
+                return entityList;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("#Redis-Cache GetAll entities.", ex);
+                throw;
+            }
         }
 
         public async Task<T> GetById(string id)
         {
-            if (_database.KeyExists(_entityKey))
+            try
             {
-                var entity = await _database.HashGetAsync(_entityKey, id);
-                return entity.HasValue ? JsonSerializer.Deserialize<T>(entity) : null;
+                if (_database.KeyExists(_entityKey))
+                {
+                    var entity = await _database.HashGetAsync(_entityKey, id);
+                    return entity.HasValue ? JsonSerializer.Deserialize<T>(entity) : null;
+                }
+                return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                _logger.LogError($"#Redis-Cache GetById ID {id}.", ex);
+                throw;
+            }
         }
 
         public async Task<T> SetEntity(T entity)
         {
-            await _database.HashSetAsync(_entityKey, entity.Id, JsonSerializer.Serialize(entity));
-            return entity;
+            try
+            {
+                await _database.HashSetAsync(_entityKey, entity.Id, JsonSerializer.Serialize(entity));
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("#Redis-Cache  SetEntity.", ex);
+                throw;
+            }
         }
 
         public async Task<T> Update(string updatedId, T newEntity)
         {
-            var updatedEntity = await _database.HashGetAsync(_entityKey, updatedId);
-
-            await SetEntity(newEntity);
-            return newEntity;
+            try
+            {
+                var updatedEntity = await _database.HashGetAsync(_entityKey, updatedId);
+                await SetEntity(newEntity);
+                return newEntity;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"#Redis-Cache Update entity with [Id]: {updatedId}.", ex);
+                throw;
+            }
         }
+
         public async Task<bool> ChangeStatusOfEntity(string id, int statusCode)
         {
-            var redisData = await _database.HashGetAsync(_entityKey, id);
-            var entity = JsonSerializer.Deserialize<T>(redisData);
-            entity.Status = (BaseStatus)statusCode;
-            await SetEntity(entity);
-            return true;
-           
-
+            try
+            {
+                var redisData = await _database.HashGetAsync(_entityKey, id);
+                var entity = JsonSerializer.Deserialize<T>(redisData);
+                entity.Status = (BaseStatus)statusCode;
+                await SetEntity(entity);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"#Redis-Cache ChangeStatusOfEntity [Id]: {id}.", ex);
+                return false;
+            }
         }
     }
 }

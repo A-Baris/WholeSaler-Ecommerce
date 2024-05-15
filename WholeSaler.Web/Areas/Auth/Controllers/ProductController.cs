@@ -38,7 +38,7 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string categoryId)
+        public async Task<IActionResult> Index(string categoryId,string ascending)
         {
             var storeId = "";
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -57,6 +57,14 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
             {
                 var jsonString = await response.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<List<MyStoreVM>>(jsonString);
+                data = data.OrderByDescending(x => x.SumofSales).ToList();
+                if (ascending != null)
+                {
+                    data = data.OrderBy(x => x.SumofSales).ToList();
+                   
+                }
+             
+
                 var categoryUri = "https://localhost:7185/api/category";
                 var categoryResponse = await _httpClient.GetAsync(categoryUri);
                 var categoryJson = await categoryResponse.Content.ReadAsStringAsync();
@@ -246,6 +254,23 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
             var changeStatusApiUri = $"https://localhost:7185/api/product/changestatus/{id}/{statusCode}";
             var response = await _httpClient.GetAsync(changeStatusApiUri);
             return RedirectToAction("index", "product", new { area = "auth" });
+        }
+        [HttpGet]
+        public async Task<IActionResult> PreviewProduct(string id)
+        {      
+            var getProductUri = $"https://localhost:7185/api/product/{id}";
+            var response = await _httpClient.GetAsync(getProductUri);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonProduct = await response.Content.ReadAsStringAsync();
+                var productData = JsonConvert.DeserializeObject<ProductVM>(jsonProduct);
+                if (productData != null)
+                {
+                    return View(productData);
+                }
+
+            }
+            return RedirectToAction("index", "product",new {area="auth"});
         }
 
     }

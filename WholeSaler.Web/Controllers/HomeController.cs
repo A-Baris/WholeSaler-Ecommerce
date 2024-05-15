@@ -34,7 +34,7 @@ namespace WholeSaler.Web.Controllers
 
 
         }
-
+        [HttpGet]
         public async Task<IActionResult> Index(string productName, string categoryName)
         {
 
@@ -89,116 +89,8 @@ namespace WholeSaler.Web.Controllers
         }
 
 
-        //[HttpGet]
-        //public  IActionResult Login()
-        //{
-        //    return View();
-        //}
-        //[HttpPost]
-        //public async Task<IActionResult> Login(UserLoginVM loginVM)
-        //{
+    
 
-
-        //    var apiUrl = "https://localhost:7185/api/user/login";
-        //    var json = JsonConvert.SerializeObject(loginVM);
-        //    var content = new StringContent(json,System.Text.Encoding.UTF8,"application/json");
-        //    var response = await _httpClient.PostAsync(apiUrl, content);
-
-        //    if(response.IsSuccessStatusCode)
-        //    {
-
-        //        // API'den gelen yanýtý oku
-        //        var responseBody = await response.Content.ReadAsStringAsync();
-
-        //        // Yanýt içindeki JWT token'ý al
-
-        //        var token = responseBody;
-
-        //        // Token'ý iþle (örneðin, token'ý JWT kütüphanesi kullanarak iþleyebilirsiniz)
-        //        var handler = new JwtSecurityTokenHandler();
-        //        var jwtToken = handler.ReadJwtToken(token);
-
-        //        // JWT token içindeki talepleri al ve ClaimsIdentity oluþtur
-        //        var userClaims = jwtToken.Claims;
-        //        var identity = new ClaimsIdentity(userClaims, "ApiAuth");
-
-        //        // ClaimsIdentity üzerinden ClaimsPrincipal oluþtur ve HttpContext.User'a ata
-        //        var principal = new ClaimsPrincipal(identity);
-        //        HttpContext.User = principal;
-
-
-
-
-
-
-
-
-        //        var userId = User.Claims.FirstOrDefault(c => c.Type == JwtClaims.UserId)?.Value;
-        //        var user2 = User.Identity.Name;
-
-        //        var visitorId = Request.Cookies["visitor"];
-        //        var checkCartUri = $"https://localhost:7185/api/shoppingcart/getcart/{visitorId}";
-
-        //        try
-        //        {
-        //            var result = await _httpClient.GetAsync(checkCartUri);
-        //            var jsonString = await result.Content.ReadAsStringAsync();
-        //            var shoppingCart = JsonConvert.DeserializeObject<ShoppingCartUpdateVM>(jsonString);
-        //            if (shoppingCart != null)
-        //            {
-        //                var checkCartLoginUserUri = $"https://localhost:7185/api/shoppingcart/getcart/{userId}";
-        //                var userCart = await _httpClient.GetAsync(checkCartLoginUserUri);
-        //                var jsonStringForUser = await userCart.Content.ReadAsStringAsync();
-        //                var shoppingCartForUser = JsonConvert.DeserializeObject<ShoppingCartUpdateVM>(jsonStringForUser);
-        //                if (shoppingCartForUser != null)
-        //                {
-        //                    foreach (var item in shoppingCart.Products)
-        //                    {
-        //                        shoppingCartForUser.Products.Add(item);
-
-        //                    }
-        //                    var userCartUpdate = "https://localhost:7185/api/shoppingcart/edit";
-        //                    var jsonCartUpdate = JsonConvert.SerializeObject(shoppingCartForUser);
-        //                    var contentCartUpdate = new StringContent(jsonCartUpdate, System.Text.Encoding.UTF8, "application/json");
-        //                    var resultUpdateUserCart = await _httpClient.PutAsync(userCartUpdate, contentCartUpdate);
-        //                    return RedirectToAction("Index", "Home");
-        //                }
-        //                shoppingCart.UserId = userId;
-
-        //                var cartUpdateUri = "https://localhost:7185/api/shoppingcart/edit";
-        //                var jsonUpdate = JsonConvert.SerializeObject(shoppingCart);
-        //                var contentUpdate = new StringContent(jsonUpdate, System.Text.Encoding.UTF8, "application/json");
-        //                var resultUpdateCart = await _httpClient.PutAsync(cartUpdateUri, contentUpdate);
-        //                return RedirectToAction("Index", "Home");
-        //            }
-        //        } catch (Exception ex) { Console.WriteLine(ex.Message); }
-
-
-
-        //        return RedirectToAction("Index", "Home");
-
-
-        //    }
-
-
-
-        //    return View("login");
-        //}
-
-        //public IActionResult Logout()
-        //{
-        //    Response.Cookies.Delete("access_token");
-
-
-        //    return RedirectToAction("Index", "Home");
-        //}
-
-
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

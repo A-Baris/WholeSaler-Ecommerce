@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using NuGet.Common;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product;
 using WholeSaler.Web.Helpers.IdentyClaims;
@@ -128,9 +129,13 @@ namespace WholeSaler.Web.Controllers
                 }
 
                 var cartUpdateUri = "https://localhost:7185/api/shoppingcart/edit";
+                var accessToken = Request.Cookies["AccessToken"];
+                AuthenticationHeaderValue authHeader = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                _httpClient.DefaultRequestHeaders.Authorization = authHeader;
                 var jsonUpdate = JsonConvert.SerializeObject(data);
-                var contentUpdate = new StringContent(jsonUpdate, System.Text.Encoding.UTF8, "application/json");
-                var resultUpdateCart = await _httpClient.PutAsync(cartUpdateUri, contentUpdate);
+                var contentUpdate = new StringContent(jsonUpdate, System.Text.Encoding.UTF8, "application/json");             
+                    var resultUpdateCart = await _httpClient.PutAsync(cartUpdateUri, contentUpdate);
                 TempData["CartMessage"] = $"{productVM.Name} is added to the cart";
                 return returnUrl != null ? Redirect(returnUrl) : RedirectToAction("Index", "Home");
 
@@ -141,6 +146,7 @@ namespace WholeSaler.Web.Controllers
 
            
         }
+        [HttpPost]
         public async Task<IActionResult> Edit(ShoppingCartUpdateVM cartUpdateVM)
         {
             var apiUri = "https://localhost:7185/api/shoppingcart/editincart";
@@ -155,6 +161,20 @@ namespace WholeSaler.Web.Controllers
             return RedirectToAction("index");
 
 
+        }
+        [HttpGet]
+        public async Task<IActionResult> TestEdit(string Id)
+        {
+            var apiUri = "https://localhost:7185/api/shoppingcart/editincart";
+            var jsonUpdate = JsonConvert.SerializeObject(Id);
+            var contentUpdate = new StringContent(jsonUpdate, System.Text.Encoding.UTF8, "application/json");
+            var resultUpdateCart = await _httpClient.PutAsync(apiUri, contentUpdate);
+            if (resultUpdateCart.IsSuccessStatusCode)
+            {
+
+                return RedirectToAction("index");
+            }
+            return RedirectToAction("index");
         }
 
         public async Task<IActionResult> DeleteTheProductInCart(string cartId,string productId)

@@ -1,0 +1,63 @@
+﻿@model IEnumerable<WholeSaler.Web.Areas.Auth.Models.ViewModels.Store.SalesReportVM>
+
+@{
+    ViewData["Title"] = "SalesReport";
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+    var notFoundMessage = TempData["NotFoundMessage"] as string;
+    decimal totalIncomeofSales = 0;
+
+}
+<form method="get" asp-action="SalesReport" asp-controller="store" asp-area="auth">
+    <label for="startDate">Start Date:</label>
+    <input type="datetime" id="startDate" name="startDate" placeholder="dd.mm.yyyy" required>
+    
+
+    <label for="endDate">End Date:</label>
+    <input class="btn-sm" type="datetime" id="endDate" name="endDate" placeholder="dd.mm.yyyy">
+
+    <button class="btn btn-primary btn-sm" type="submit">Generate Report</button>
+</form>
+<a class="btn btn-primary" asp-action="salesreport" asp-controller="store" asp-area="auth">Show All</a>
+<table class="table">
+    <thead>
+        <tr>
+
+            <th>
+                @Html.DisplayNameFor(model => model.StoreId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalPrice)
+            </th>
+            
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+            totalIncomeofSales += item.TotalPrice;
+            <tr>
+          
+            <td>
+                @Html.DisplayFor(modelItem => item.StoreId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.OrderDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalPrice) TL
+            </td>
+          
+        </tr>
+}
+    </tbody>
+</table>
+<h6>Total Income of Sales = @totalIncomeofSales.ToString("0.00") TL</h6>
+@if(!string.IsNullOrEmpty(notFoundMessage))
+{
+    <div class="align-content-center">
+        <h5 style="color:red">@notFoundMessage</h5>
+    </div>
+
+}
