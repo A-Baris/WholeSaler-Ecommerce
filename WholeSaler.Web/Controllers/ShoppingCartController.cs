@@ -129,10 +129,7 @@ namespace WholeSaler.Web.Controllers
                 }
 
                 var cartUpdateUri = "https://localhost:7185/api/shoppingcart/edit";
-                var accessToken = Request.Cookies["AccessToken"];
-                AuthenticationHeaderValue authHeader = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                _httpClient.DefaultRequestHeaders.Authorization = authHeader;
+                
                 var jsonUpdate = JsonConvert.SerializeObject(data);
                 var contentUpdate = new StringContent(jsonUpdate, System.Text.Encoding.UTF8, "application/json");             
                     var resultUpdateCart = await _httpClient.PutAsync(cartUpdateUri, contentUpdate);

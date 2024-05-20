@@ -20,10 +20,10 @@ using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.File("logs/info-.log", restrictedToMinimumLevel: LogEventLevel.Information)
+    //.WriteTo.File("logs/info-.log", restrictedToMinimumLevel: LogEventLevel.Information)
     .WriteTo.File("logs/error-.log", restrictedToMinimumLevel: LogEventLevel.Error)
     .WriteTo.File("logs/warning-.log", restrictedToMinimumLevel: LogEventLevel.Warning)
-    .WriteTo.File("logs/debug-.log", restrictedToMinimumLevel: LogEventLevel.Debug)
+    //.WriteTo.File("logs/debug-.log", restrictedToMinimumLevel: LogEventLevel.Debug)
     .CreateLogger();
 
 builder.Services.AddCors(options =>

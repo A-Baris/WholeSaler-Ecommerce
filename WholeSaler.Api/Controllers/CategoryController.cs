@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WholeSaler.Api.Controllers.Base;
+using WholeSaler.Api.DTOs.Category;
 using WholeSaler.Business.AbstractServices;
 using WholeSaler.Business.Logger;
 using WholeSaler.Entity.Entities;
@@ -10,16 +13,18 @@ namespace WholeSaler.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     
-    public class CategoryController : ControllerBase
+    public class CategoryController : BaseController
     {
         private readonly ICategoryServiceWithRedis _categoryWithRedis;
         private readonly ILogger<CategoryController> _logger;
+        private readonly IMapper _mapper;
         private string controllerName = "CategoryController";
 
-        public CategoryController(ICategoryServiceWithRedis categoryWithRedis,ILogger<CategoryController> logger)
+        public CategoryController(ICategoryServiceWithRedis categoryWithRedis,ILogger<CategoryController> logger,IMapper mapper)
         {
            _categoryWithRedis = categoryWithRedis;
             _logger = logger;
+            _mapper = mapper;
         }
       
         [HttpGet]
@@ -28,7 +33,10 @@ namespace WholeSaler.Api.Controllers
             try
             {
                 var categories = await _categoryWithRedis.GetAll();
-                return Ok(categories);
+                if (categories == null) return NotFound();
+                var categoryList = _mapper.Map<List<CategoryDto>>(categories);
+                
+                return Ok(categoryList);
 
             }
 
@@ -54,8 +62,12 @@ namespace WholeSaler.Api.Controllers
         {
             try
             {
-                var category = await _categoryWithRedis.GetById(id);
-                return category != null ? Ok(category):NotFound(id);
+                return await ValidateAndExecute(id,
+                    async (ctgr) => await _categoryWithRedis.GetById(ctgr),
+                    result =>
+                    {
+                        return result!=null ? Ok(result) : NotFound();
+                    });
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -77,8 +89,15 @@ namespace WholeSaler.Api.Controllers
 
             try
             {
-                var newEntity = await _categoryWithRedis.Create(category);
-                return newEntity != null ? Ok(newEntity) : BadRequest();
+                return await ValidateAndExecute(category,
+                    async (ctgr) => await _categoryWithRedis.Create(ctgr),
+                    result =>
+                    {
+
+                        var categoryDto = _mapper.Map<CategoryDto>(result);
+                        return categoryDto != null ? Ok(categoryDto) : BadRequest();
+                    });
+                
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -100,8 +119,16 @@ namespace WholeSaler.Api.Controllers
         {
             try
             {
-                var updatedEntity = await _categoryWithRedis.Update(category.Id, category);
-                return updatedEntity!=null ? Ok(updatedEntity) : BadRequest();
+                return await ValidateAndExecute(category,
+                    async (ctgr) => await _categoryWithRedis.Update(ctgr.Id, ctgr),
+                    result =>
+                    {
+                        var categoryDto = _mapper.Map<CategoryDto>(result);
+                        return categoryDto != null ? Ok(categoryDto) : BadRequest();
+                    });
+                
+             
+               
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -123,8 +150,14 @@ namespace WholeSaler.Api.Controllers
         {
             try
             {
-                var result = await _categoryWithRedis.Delete(id);
-                return result?Ok():NotFound();
+                return await ValidateAndExecute(id,
+                    async (ctgr) => await _categoryWithRedis.Delete(ctgr),
+                    result =>
+                    {
+                        return result ? Ok() : NotFound();
+                    });
+               
+              
             }
             catch (UnauthorizedAccessException ex)
             {

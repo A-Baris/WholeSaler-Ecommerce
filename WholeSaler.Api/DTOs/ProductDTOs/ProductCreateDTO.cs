@@ -12,9 +12,9 @@ namespace WholeSaler.Api.DTOs.ProductDTOs
         public decimal UnitPrice { get; set; }
         public decimal Stock { get; set; }
         public string? Description { get; set; }
-        public List<ProductImage>? Images { get; set; }
+        public List<ProductImage> Images { get; set; }
 
-        public ProductCategoryEmbedDTO? Category { get; set; }
-        public ProductStoreEmbedDTO? Store { get; set; }
+        public ProductCategoryEmbedDTO Category { get; set; }
+        public ProductStoreEmbedDTO Store { get; set; }
     }
 }

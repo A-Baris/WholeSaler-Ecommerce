@@ -9,11 +9,11 @@
 }
 <form method="get" asp-action="SalesReport" asp-controller="store" asp-area="auth">
     <label for="startDate">Start Date:</label>
-    <input type="datetime" id="startDate" name="startDate" placeholder="dd.mm.yyyy" required>
+    <input type="date" id="startDate" name="startDate"  required>
     
 
     <label for="endDate">End Date:</label>
-    <input class="btn-sm" type="datetime" id="endDate" name="endDate" placeholder="dd.mm.yyyy">
+    <input class="btn-sm" type="date" id="endDate" name="endDate">
 
     <button class="btn btn-primary btn-sm" type="submit">Generate Report</button>
 </form>
@@ -35,6 +35,7 @@
         </tr>
     </thead>
     <tbody>
+
 @foreach (var item in Model) {
             totalIncomeofSales += item.TotalPrice;
             <tr>
@@ -51,6 +52,8 @@
           
         </tr>
 }
+        
+        
     </tbody>
 </table>
 <h6>Total Income of Sales = @totalIncomeofSales.ToString("0.00") TL</h6>
