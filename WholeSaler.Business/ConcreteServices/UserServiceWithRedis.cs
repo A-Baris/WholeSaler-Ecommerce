@@ -12,11 +12,11 @@ using WholeSaler.Entity.Entities;
 
 namespace WholeSaler.Business.ConcreteServices
 {
-    public class UserServiceWithRedis : MongoDBWithRedis<User>, IUserServiceWithRedis
+    public class UserServiceWithRedis : MongoWithRedisRepo<User>, IUserServiceWithRedis
     {
-        private readonly IMongoDBRepo<User> _mongoDB;
+        private readonly BaseMongoDBRepo<User> _mongoDB;
 
-        public UserServiceWithRedis(IRedis_Cache<User> redis, IMongoDBRepo<User> mongoDB) : base(redis, mongoDB)
+        public UserServiceWithRedis(IRedis_Cache<User> redis, BaseMongoDBRepo<User> mongoDB) : base(redis, mongoDB)
         {
             _mongoDB = mongoDB;
         }

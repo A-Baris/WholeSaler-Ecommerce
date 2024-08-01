@@ -14,14 +14,14 @@ using WholeSaler.Entity.Entities.Enums;
 
 namespace WholeSaler.Business.ConcreteServices
 {
-    public class OrderServiceWithRedis : MongoDBWithRedis<Order>, IOrderServiceWithRedis
+    public class OrderServiceWithRedis : MongoWithRedisRepo<Order>, IOrderServiceWithRedis
     {
-        private readonly IMongoDBRepo<Order> _mongoDB;
+        private readonly BaseMongoDBRepo<Order> _mongoDB;
 
 
 
         private readonly IMongoCollection<Store> _storeCollection;
-        public OrderServiceWithRedis(IRedis_Cache<Order> redis, IMongoDBRepo<Order> mongoDB) : base(redis, mongoDB)
+        public OrderServiceWithRedis(IRedis_Cache<Order> redis, BaseMongoDBRepo<Order> mongoDB) : base(redis, mongoDB)
         {
             _mongoDB = mongoDB;
 

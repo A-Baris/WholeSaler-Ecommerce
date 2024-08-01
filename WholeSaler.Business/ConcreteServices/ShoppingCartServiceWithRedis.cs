@@ -14,12 +14,12 @@ using WholeSaler.Entity.Entities.Enums;
 
 namespace WholeSaler.Business.ConcreteServices
 {
-    public class ShoppingCartServiceWithRedis : MongoDBWithRedis<ShoppingCart>, IShoppingCartServiceWithRedis
+    public class ShoppingCartServiceWithRedis : MongoWithRedisRepo<ShoppingCart>, IShoppingCartServiceWithRedis
     {
-        private readonly IMongoDBRepo<ShoppingCart> _mongoDB;
+        private readonly BaseMongoDBRepo<ShoppingCart> _mongoDB;
         private readonly IMongoCollection<ShoppingCart> _shoppingCartCollection;
 
-        public ShoppingCartServiceWithRedis(IRedis_Cache<ShoppingCart> redis, IMongoDBRepo<ShoppingCart> mongoDB) : base(redis, mongoDB)
+        public ShoppingCartServiceWithRedis(IRedis_Cache<ShoppingCart> redis, BaseMongoDBRepo<ShoppingCart> mongoDB) : base(redis, mongoDB)
         {
             _mongoDB = mongoDB;
             _shoppingCartCollection = _mongoDB.GetCollection();

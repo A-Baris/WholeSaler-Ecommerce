@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WholeSaler.Entity.Entities.Embeds.Category;
+
 
 namespace WholeSaler.Entity.Entities
 {
@@ -10,5 +12,6 @@ namespace WholeSaler.Entity.Entities
     {
         public string Name { get; set; }
         public string? Description { get; set; }
+        public List<SubCategory>? SubCategories { get; set; }
     }
 }

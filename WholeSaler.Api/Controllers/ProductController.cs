@@ -2,11 +2,21 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
+using System.Reflection;
 using WholeSaler.Api.Controllers.Base;
+using WholeSaler.Api.DTOs;
 using WholeSaler.Api.DTOs.ProductDTOs;
+using WholeSaler.Api.DTOs.ProductDTOs.TProducts;
+using WholeSaler.Api.Helpers.ProductHelper;
 using WholeSaler.Business.AbstractServices;
 using WholeSaler.Entity.Entities;
 using WholeSaler.Entity.Entities.Embeds.Product;
+using WholeSaler.Entity.Entities.Products;
+using WholeSaler.Entity.Entities.Products.Features;
 using static MongoDB.Libmongocrypt.CryptContext;
 
 namespace WholeSaler.Api.Controllers
@@ -18,6 +28,7 @@ namespace WholeSaler.Api.Controllers
         private readonly IProductServiceWithRedis _productService;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
+      
         private string controllerName = "ProductController";
 
         public ProductController(IProductServiceWithRedis productService, IMapper mapper, ILogger<ProductController> logger)
@@ -25,6 +36,7 @@ namespace WholeSaler.Api.Controllers
             _productService = productService;
             _mapper = mapper;
             _logger = logger;
+   
         }
 
 
@@ -34,9 +46,15 @@ namespace WholeSaler.Api.Controllers
             try
             {
                 var products = await _productService.GetAll();
-                if (products == null) return NotFound();
-                var productDto = _mapper.Map<List<ProductDto>>(products);
-                return Ok(productDto);
+                var settings = new JsonSerializerSettings
+                {
+                    //TypeNameHandling = TypeNameHandling.Auto,
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                };
+
+                var jsonResult = JsonConvert.SerializeObject(products, settings);
+
+                return Ok(jsonResult);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -49,6 +67,7 @@ namespace WholeSaler.Api.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        
 
 
         [HttpGet("{id}")]
@@ -60,8 +79,9 @@ namespace WholeSaler.Api.Controllers
                     async (prd) => await _productService.GetById(prd),
                     result =>
                     {
-                        var productDto = _mapper.Map<ProductDto>(result);
-                        return productDto != null ? Ok(productDto) : NotFound();
+
+                        
+                        return result != null ? Ok(result) : NotFound();
                     });
 
 
@@ -79,14 +99,16 @@ namespace WholeSaler.Api.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(ProductCreateDTO product)
+        [HttpPost("create")]
+        public async Task<IActionResult> Create([FromBody] ProductCreateDTO createDTO)
         {
+            var createProduct = ProductHelper.CreateProductFromDto(createDTO);
+          
+            
             try
             {
-                var productEntity = _mapper.Map<Product>(product);
                 return await ValidateAndExecute(
-           productEntity,
+           createProduct,
            async (prod) => await _productService.Create(prod),
            result =>
            {
@@ -104,18 +126,24 @@ namespace WholeSaler.Api.Controllers
                 _logger.LogError($"#{controllerName} Create - {ex.Message}", ex);
                 return StatusCode(500, ex.Message);
             }
+
+
+         
+
         }
         [HttpPut("edit")]
-        public async Task<IActionResult> Update(Product product)
+        public async Task<IActionResult> Update([FromBody] ProductUpdateDto update)
         {
+          
             try
             {
-                return await ValidateAndExecute(product,
+                var updatedEntity = ProductHelper.UpdateProductFromDto(update);
+                return await ValidateAndExecute(updatedEntity,
                     async (prd) => await _productService.Update(prd.Id, prd),
                     result =>
                     {
-                        var productDto = _mapper.Map<ProductDto>(result);
-                        return productDto != null ? Ok(productDto) : BadRequest();
+                       
+                        return result != null ? Ok(result) : BadRequest();
                     });
 
             }
@@ -239,25 +267,42 @@ namespace WholeSaler.Api.Controllers
         [HttpGet("mystore/{storeId}")]
         public async Task<IActionResult> GetPrivateStoreWithProducts(string storeId)
         {
-            var products = await _productService.GetTheStoreWithPRoducts(storeId);
+            var products = await _productService.GetTheStoreWithProducts(storeId);
             return Ok(products);
 
         }
-        [HttpPut("updateStocks")]
-        public async Task<IActionResult> UpdateStocks(List<Product> products)
+        [HttpGet("productReview/{id}")]
+        public async Task<IActionResult> GetProductReviewForStore(string id)
         {
+            var product = await _productService.GetProductForReview(id);
+            return Ok(product);
+        }
+       
+        [HttpPut("updateStocks")]
+        public async Task<IActionResult> UpdateStocks([FromBody] List<ProductDto> products)
+        {
+
             int quantity = 0;
             foreach (var prd in products)
             {
-
-                prd.Stock -= prd.Quantity;
+                
+                var editPrd = await _productService.GetById(prd.Id);
+                editPrd.Stock -= prd.Quantity;
                 quantity = Convert.ToInt32(prd.Quantity);
-                prd.SumOfSales = quantity + prd.SumOfSales;
-                await _productService.Update(prd.Id, prd);
+                editPrd.SumOfSales = quantity + editPrd.SumOfSales;
+                await _productService.Update(prd.Id, editPrd);
             }
 
             return Ok();
         }
 
+        [HttpGet("GetProduct/{id}")]
+        public async Task<IActionResult> GetProduct(string id)
+        {
+            var prd = await _productService.GetProduct(id);
+            return Ok(prd);
+        }
+
+       
     }
 }

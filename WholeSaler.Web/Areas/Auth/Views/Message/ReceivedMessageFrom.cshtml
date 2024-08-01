@@ -1,0 +1,56 @@
+﻿@model List<WholeSaler.Web.Models.ViewModels.Message.ReceivedMessageVM>
+@{
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+    var receiverName = ViewBag.ReceiverName;
+    var receieverId = ViewBag.ReceiverId;
+
+
+}
+@foreach (var message in Model)
+{
+
+  
+        @if (receiverName == message.SenderName)
+        {
+        <div class="message" style="border: solid 1px #ccc; padding: 10px; margin-bottom: 10px; background-color:ghostwhite">
+                <h4>@message.Header</h4>
+                <p>@message.Body</p>
+                <small>@message.CreatedDate</small>
+                <small style="color:red">@message.SenderName</small>
+        </div>
+        }
+        else
+        {
+        <div class="message" style="border: solid 1px #ccc; padding: 10px; margin-bottom: 10px;background-color:#b4f0e6">
+                <h4>@message.Header</h4>
+                <p>@message.Body</p>
+                <small>@message.CreatedDate</small>
+                <small style="color:blue">You</small>
+        </div>
+        }
+   
+
+
+}
+<div>
+    <form asp-action="sendMessage" asp-controller="message" asp-area="auth">
+        <div class="form-group">
+            <input type="text" name="ReceiverName" class="form-control" value="@receiverName" hidden />
+            <input name="ReceiverId" value="@receieverId" hidden />
+        </div>
+        <div class="form-group">
+            <label name="Header"></label>
+            <input type="text" name="Header" class="form-control" placeholder="Header" />
+
+        </div>
+        <div class="form-group">
+
+            <textarea type="text" name="Body" class="form-control" placeholder="Body Text"></textarea>
+
+        </div>
+        <div class="text-center" style="margin-top:5px">
+            <button class="btn btn-primary" type="submit">Send Message</button>
+        </div>
+
+    </form>
+</div>

@@ -2,20 +2,25 @@
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-    var successMesage = TempData["success"] as string;
-}
 
-@if (successMesage != null)
-{
-    <h3>@successMesage</h3>
 }
 
 
-<form method="post" asp-action="create" asp-controller="category" asp-area="admin">
-    <div class="col-md-4">
-        <input class="form-control" name="Name" placeholder="Name"  />
-        <input class="form-control" name="Description" placeholder="Category Description" />
+<div class="row justify-content-center" style="margin-top:20px">
+
+    <div class="col-md-3">
+
+        <form method="post" asp-action="create" asp-controller="category" asp-area="admin">
+           
+                <input class="form-control" asp-for="Name" placeholder="Name" />
+                <input class="form-control" asp-for="Description" placeholder="Category Description" />
+                <textarea class="form-control" name="subCategoryNames" placeholder="Sub Category Name"></textarea>
+                <span>*You have to put "," if you add more than one*</span>
+          
+            <div class="text-center" style="margin-top:5px">
+            <button class="btn btn-primary" type="submit" >Create</button>
+            </div>
+        </form>
+
     </div>
-    <button type="submit">Create</button>
-</form>
-
+</div>

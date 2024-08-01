@@ -25,7 +25,7 @@ namespace WholeSaler.Web.FluentValidation.Validators.User
             .WithMessage("Password confirmation does not match the password");
 
             RuleFor(x => x.Phone)
-                .Matches(@"^(05\d{9})$").WithMessage("Phone number must be in the format 05X XXX XX XX");
+                .Matches(@"^(05\d{9})$").WithMessage("Phone number must be in the format 05XX XXX XX XX");
           
 
 

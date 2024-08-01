@@ -1,0 +1,31 @@
+﻿@model WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-3">
+      <form class="form-control-lg" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" value="@Model.Name"/>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" value="@Model.Description" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="text-center" style="margin-top:5px">
+                <input asp-for="Id" value="@Model.Id" hidden/>
+                <button class="btn btn-primary" type="submit">Edit</button>
+            </div>
+        </form>
+       
+    </div>
+</div>
+

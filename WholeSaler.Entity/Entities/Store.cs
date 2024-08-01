@@ -9,6 +9,7 @@ namespace WholeSaler.Entity.Entities
 {
     public class Store:BaseEntity
     {
+  
         public Store()
         {
             AdminConfirmation = 0;
@@ -22,6 +23,7 @@ namespace WholeSaler.Entity.Entities
         public AdminConfirmation? AdminConfirmation { get; set; }
 
         public string? UserId { get; set; }
-   
+        public string? ConnectionId { get; set; }
+
     }
 }

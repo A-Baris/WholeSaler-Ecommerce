@@ -1,4 +1,7 @@
-﻿using StackExchange.Redis;
+﻿using Microsoft.Extensions.Configuration;
+using MongoDB.Bson.IO;
+using Newtonsoft.Json;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,17 +18,18 @@ namespace WholeSaler.Business.Redis.Concrete
 {
     public class Redis_Cache<T> : IRedis_Cache<T> where T : BaseEntity
     {
-        private readonly ConnectionMultiplexer _redis;
         private readonly StackExchange.Redis.IDatabase _database;
         private readonly string _entityKey;
         private readonly ILogger _logger;
 
-        public Redis_Cache(int dbNo, string entityKey, string url,ILogger logger)
+        public Redis_Cache(IConfiguration config)
         {
-            _redis = ConnectionMultiplexer.Connect(url);
-            _database = _redis.GetDatabase(dbNo);
-            _entityKey = entityKey;
-            _logger = logger;
+            var url = config["ConnectionStrings:Redis"];
+            if (string.IsNullOrWhiteSpace(url)) throw new ArgumentNullException(nameof(url));
+
+            var redis = ConnectionMultiplexer.Connect($"{url},abortConnect=false");
+            _database = redis.GetDatabase(1);
+            _entityKey = typeof(T).Name;
         }
         public async Task<bool> Delete(string id)
         {
@@ -49,7 +53,7 @@ namespace WholeSaler.Business.Redis.Concrete
             try
             {
                 var cacheEntity = await _database.HashGetAllAsync(_entityKey);
-                var entityList = cacheEntity.Select(item => JsonSerializer.Deserialize<T>(item.Value)).ToList();
+                var entityList = cacheEntity.Select(item => Newtonsoft.Json.JsonConvert.DeserializeObject<T>(item.Value)).ToList();
                 return entityList;
             }
             catch (Exception ex)
@@ -66,7 +70,7 @@ namespace WholeSaler.Business.Redis.Concrete
                 if (_database.KeyExists(_entityKey))
                 {
                     var entity = await _database.HashGetAsync(_entityKey, id);
-                    return entity.HasValue ? JsonSerializer.Deserialize<T>(entity) : null;
+                    return entity.HasValue ? Newtonsoft.Json.JsonConvert.DeserializeObject<T>(entity) : null;
                 }
                 return null;
             }
@@ -77,16 +81,36 @@ namespace WholeSaler.Business.Redis.Concrete
             }
         }
 
+        //public async Task<T> SetEntity(T entity)
+        //{
+        //    try
+        //    {
+        //        await _database.HashSetAsync(_entityKey, entity.Id, JsonSerializer.Serialize(entity));
+        //        return entity;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError("#Redis-Cache  SetEntity.", ex);
+        //        throw;
+        //    }
+        //}
         public async Task<T> SetEntity(T entity)
         {
             try
             {
-                await _database.HashSetAsync(_entityKey, entity.Id, JsonSerializer.Serialize(entity));
+                var settings = new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+                };
+
+                var serializedEntity = Newtonsoft.Json.JsonConvert.SerializeObject(entity, settings);
+                await _database.HashSetAsync(_entityKey, entity.Id, serializedEntity);
                 return entity;
             }
             catch (Exception ex)
             {
-                _logger.LogError("#Redis-Cache  SetEntity.", ex);
+                _logger.LogError("#Redis-Cache SetEntity.", ex);
                 throw;
             }
         }
@@ -111,7 +135,7 @@ namespace WholeSaler.Business.Redis.Concrete
             try
             {
                 var redisData = await _database.HashGetAsync(_entityKey, id);
-                var entity = JsonSerializer.Deserialize<T>(redisData);
+                var entity = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(redisData);
                 entity.Status = (BaseStatus)statusCode;
                 await SetEntity(entity);
                 return true;

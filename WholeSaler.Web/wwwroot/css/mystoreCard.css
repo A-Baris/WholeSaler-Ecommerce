@@ -59,13 +59,7 @@
     overflow: hidden; /* Kartın içeriğinin taşmasını engelle */
 }
 
-.price {
-    color: grey;
-    font-size: 22px;
-    border-radius: 50%; /* This creates a perfect circle */
-    border: 2px solid #333;
-    border-color: green;
-}
+
 
 .card button {
     border: none;

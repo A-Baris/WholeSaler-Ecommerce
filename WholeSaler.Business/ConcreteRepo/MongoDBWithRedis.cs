@@ -93,7 +93,7 @@ namespace WholeSaler.Business.ConcreteRepo
         public async Task<T> Update(string updatedId, T newEntity)
         {
             var mongoDbResult = await _mongoDB.Update(newEntity);
-            var redisResult = await _redis.Update(updatedId, newEntity);
+            var redisResult = await _redis.Update(mongoDbResult.Id, mongoDbResult);
             if (mongoDbResult!=null && redisResult!=null)
             {
                 return newEntity;

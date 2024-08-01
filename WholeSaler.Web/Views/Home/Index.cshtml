@@ -14,84 +14,119 @@
 <link href="~/css/mystoreCard.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-<div class="container">
-
-@if (!string.IsNullOrEmpty(cartMessage))
-{
-
-    <div class="row justify-content-center">
-        <div id="messageDiv" class="col-md-6 alert alert-success">
-            <div class="d-flex justify-content-center align-items-center">
-                <p>@cartMessage</p>
-            </div>
-        </div>
-    </div>
-
-}
-
-
-<div id="messageContainer" class="message-container">
-    @if (!string.IsNullOrEmpty(productNameMessage))
-    {
-        <div class="alert alert-danger">
-            <div class="d-flex justify-content-center align-items-center">
-                <h6>@productNameMessage</h6>
-
-            </div>
-        </div>
-
+<style>
+    .category {
+        display: inline-block;
+        /*         margin: 20px; */
+        padding: 5px;
+        /*         border: 1px solid #ccc; */
+        /*     cursor: pointer; */
     }
-</div>
-<div id="messageContainer" class="message-container">
-    @if (!string.IsNullOrEmpty(noCartMessage))
-    {
-        <div class="alert alert-danger">
-            <div class="d-flex justify-content-center align-items-center">
-                <h6>@noCartMessage</h6>
 
-            </div>
-        </div>
-
+    .subcategory-container {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        min-width: 150px;
     }
-</div>
 
-<div>
-    <div class="text-md-center">
-    <form asp-action="index" asp-controller="home" method="get">
-        <div>
-        <input placeholder="Search Product" name="productName" style="width:300px"/> <button class="btn btn-secondary" type="submit">Search</button>
-            </div>
-    </form>
-    </div>
-</div>
+    .subcategory {
+        padding: 12px 16px;
+        border-bottom: 1px solid #eee;
+    }
 
-<div class="row">
+    .category:hover .subcategory-container,
+    .category .subcategory-container:hover {
+        display: block;
+    }
 
-    <div class="col-md-2" style="border:solid;height:750px;">
-       <div>
-           <div>
-               <a asp-action="index" asp-controller="home">All Products</a>
-           </div>
-           @foreach (var category in categories as List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>)
-            {
-                <div>
-                <a style="text-decoration:none" asp-action="index" asp-controller="home" asp-route-categoryName="@category.Name">@category.Name</a>
+    .subcategory {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+        .subcategory:last-child {
+            border-bottom: none;
+        }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        z-index: 1001; /* Ensure carousel controls are above the subcategory container */
+    }
+</style>
+
+
+<div style="justify-content:center;height:90%;width:90%;margin-left:5%;margin-righ:5%;">
+    @if (!string.IsNullOrEmpty(cartMessage))
+    {
+
+        <div class="row justify-content-center">
+            <div id="messageDiv" class="col-md-6 alert alert-success">
+                <div class="d-flex justify-content-center align-items-center">
+                    <p>@cartMessage</p>
                 </div>
-            }
-       </div>
-        
+            </div>
+        </div>
 
+    }
+
+
+    <div id="messageContainer" class="message-container">
+        @if (!string.IsNullOrEmpty(productNameMessage))
+        {
+            <div class="alert alert-danger">
+                <div class="d-flex justify-content-center align-items-center">
+                    <h6>@productNameMessage</h6>
+
+                </div>
+            </div>
+
+        }
     </div>
-    <div class="col-md-8">
+    <div id="messageContainer" class="message-container">
+        @if (!string.IsNullOrEmpty(noCartMessage))
+        {
+            <div class="alert alert-danger">
+                <div class="d-flex justify-content-center align-items-center">
+                    <h6>@noCartMessage</h6>
+
+                </div>
+            </div>
+
+        }
+    </div>
+
+
+    <div class="text-center" id="categoryDiv">
+        @foreach (var category in categories as List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>)
+        {
+
+            <div class="category" style="color:#ff7400;display: inline-block; position: relative;">
+                <span><a style="text-decoration:none" asp-controller="home" asp-action="category" asp-route-categoryName="@category.Name">@category.Name</a></span>
+                <div class="subcategory-container">
+                    @foreach (var subCategory in category.SubCategories)
+                    {
+                        <div class="subcategory">
+                            <a style="text-decoration:none" asp-controller="home" asp-action="category" asp-route-categoryName="@category.Name" asp-route-subCategoryName="@subCategory.Name"><span>@subCategory.Name</span></a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+
+    <div class="col-md-9" id="productDiv">
 
         <div class="row">
             @foreach (var item in Model)
             {
-                <div class="col-md-3">
+                <div class="col-md-2" style="height:300px;width:250px">
                     <form asp-action="addtocart" asp-controller="shoppingcart" method="post">
                         <div class="card">
-                             <div class="card-img">
+                            <div class="card-img">
 
                                 @if (item.Images == null || !item.Images.Any())
                                 {
@@ -102,19 +137,19 @@
 
                                     <div id="carousel-@item.Id" class="carousel slide" data-interval="false">
                                         <div class="carousel-inner">
-                                           
-                                                @for (var i = 0; i < item.Images.Count(); i++)
-                                                {
-                                                    <div class="carousel-item @(item.Images[i] == item.Images.First()? "active" : "")">
-                                                        <img src="~/images/products/@item.Images[i].FileName" class="d-block w-100" alt="@item.Images[i].FileName" style="width:100%;height:100px">
-                                                    </div>
+
+                                            @for (var i = 0; i < item.Images.Count(); i++)
+                                            {
+                                                <div class="carousel-item @(item.Images[i] == item.Images.First()? "active" : "")">
+                                                    <img src="~/images/products/@item.Images[i].FileName" class="d-block w-100" alt="@item.Images[i].FileName" style="width:100%;height:100px">
+                                                </div>
                                                 <input type="hidden" name="Images.Index" value="@i" />
                                                 <input type="hidden" name="Images[@i].FileName" value="@item.Images[i].FileName" />
                                                 <input type="hidden" name="Images[@i].Path" value="@item.Images[i].Path" />
-                                                }
-                                               
-                                              
-                                            
+                                            }
+
+
+
                                         </div>
                                         <a class="carousel-control-prev" href="#carousel-@item.Id" role="button" data-slide="prev">
                                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -125,9 +160,9 @@
                                             <span class="sr-only">Next</span>
                                         </a>
                                     </div>
-                                    
+
                                 }
-                           
+
                             </div>
 
                             @if (userId == null)
@@ -143,25 +178,38 @@
                                     </span>
                                 </a>
                             </div>
-                            <a href="/product/details?productId=@item.Id" style="text-decoration:none;color:black;">
-                                <input name="Name" value="@item.Name" hidden />
-                                <h5>@item.Name</h5>
-                            </a>
-                            <input name="colour" value="@item.Colour" hidden />
-                            <input name="sumOfSales" value="@item.SumOfSales" hidden />
-                            <input name="unitPrice" value="@item.UnitPrice" hidden />
-                            <input name="stock" value="@item.Stock" hidden />
-                            <input name="image" value="@item.Images" hidden />
-                            <input name="store.storeName" value="@item.Store?.StoreName" hidden />
-                            <input name="store.storeId" value="@item.Store?.StoreId" hidden />
-                            <input name="category.categoryname" value="@item.Category?.CategoryName" hidden />
-                            <input name="category.categoryId" value="@item.Category?.CategoryId" hidden />
-                            <p class="price">@item.UnitPrice TL</p>
-                            <div class="input-container">
+                            <div class="card-body">
+                                <div style="height:75px">
+                                    <a href="/product/details?productId=@item.Id" style="text-decoration:none;color:black;">
+                                        <input name="Name" value="@item.Name" hidden />
+                                        <span>@item.Name</span>
+                                    </a>
+
+
+
+                                </div>
+                                <div>
+                                    <span style="color:green;"><em>@string.Format("{0:F2}", item.UnitPrice) TL</em></span>
+                                </div>
                                 <input type="type" name="quantity" value="1" hidden />
+
+                                <input name="color" value="@item.Color" hidden />
+                                <input name="sumOfSales" value="@item.SumOfSales" hidden />
+                                <input name="unitPrice" value="@item.UnitPrice" hidden />
+                                <input name="stock" value="@item.Stock" hidden />
+                                <input name="type" value="@item.Category.SubCategory.Name" hidden />
+                                <input name="image" value="@item.Images" hidden />
+                                <input name="store.storeName" value="@item.Store?.StoreName" hidden />
+                                <input name="store.storeId" value="@item.Store?.StoreId" hidden />
+                                <input name="category.categoryname" value="@item.Category?.CategoryName" hidden />
+                                <input name="category.categoryId" value="@item.Category?.CategoryId" hidden />
+                                <input name="category.subcategory.Name" value="@item.Category?.SubCategory.Name" hidden />
+                                <input name="category.subcategory.Id" value="@item.Category?.SubCategory.Id" hidden />
+
+
+
                             </div>
                             <button type="submit" class="addToCartButton">Add to Cart</button>
-
 
                         </div>
                     </form>
@@ -169,9 +217,10 @@
             }
         </div>
     </div>
-    <div class="col-md-2" style="border:solid"></div>
+
 </div>
-</div>
+
+
 <script>
     // Mesajı gizlemek için JavaScript fonksiyonu
     setTimeout(function () {
@@ -186,4 +235,50 @@
             messageDiv.style.display = 'none';
         }
     }, 2000);
+
+    // document.querySelectorAll('.category').forEach(category => {
+    //     category.addEventListener('mouseover', () => {
+    //         category.querySelector('.subcategory-container').style.display = 'block';
+    //     });
+
+    //     category.addEventListener('mouseout', () => {
+    //         category.querySelector('.subcategory-container').style.display = 'none';
+    //     });
+    // });
+    document.addEventListener('DOMContentLoaded', function () {
+        const categories = document.querySelectorAll('.category');
+        const categoryDiv = document.getElementById('categoryDiv');
+        const productDiv = document.getElementById('productDiv');
+
+        categories.forEach(category => {
+            const subCategoryContainer = category.querySelector('.subcategory-container');
+
+            category.addEventListener('mouseover', function () {
+                subCategoryContainer.style.display = 'block';
+                productDiv.style.pointerEvents = "none";
+            });
+
+            category.addEventListener('mouseout', function (event) {
+                // Only hide the subcategory container if the mouse is not over it or its children
+                if (!category.contains(event.relatedTarget)) {
+                    subCategoryContainer.style.display = 'none';
+                    productDiv.style.pointerEvents = "auto";
+                }
+            });
+
+            subCategoryContainer.addEventListener('mouseover', function () {
+                subCategoryContainer.style.display = 'block';
+                productDiv.style.pointerEvents = "none";
+            });
+
+            subCategoryContainer.addEventListener('mouseout', function (event) {
+                // Only hide the subcategory container if the mouse is not over the category or its children
+                if (!category.contains(event.relatedTarget)) {
+                    subCategoryContainer.style.display = 'none';
+                    productDiv.style.pointerEvents = "auto";
+
+                }
+            });
+        });
+    });
 </script>

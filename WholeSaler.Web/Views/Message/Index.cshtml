@@ -1,0 +1,67 @@
+﻿@{
+    ViewData["Title"] = "Message Index";
+}
+@section Scripts {
+        <script src="~/messageClient/signalr-client.js"></script>
+}
+
+
+
+<div class="container">
+    <div id="div-connection-id" class="badge" style="color:black;background-color:cornflowerblue"></div>
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+
+            <label style="background-color:red">
+                Connected Client Number<span id="span-connected-client-number" class="badge text-bg-secondary">0</span>
+            </label>
+            <button class="btn btn-primary" id="btn-send-message">Sending all clients</button>
+            <button class="btn btn-secondary" id="btn-send-message-for-private-client">Sending private client</button>
+            <button class="btn btn-danger" id="btn-send-message-for-others-client">Sending others client</button>
+
+
+        </div>
+    </div>
+
+    <div>
+        <input type="text" id="text-connectionId" placeholder="connectionId" />
+        <input type="text" id="private-message" placeholder="message" />
+        <button class="btn btn-primary" id="btn-send-message-for-selected-client">Sending selected client</button>
+    </div>
+
+    <div class="alert alert-primary" role="alert" id="groupList">
+    </div>
+
+    <div>
+        <button class="btn btn-primary" id="btn-join-groupA">Join Group-A</button>
+        <button class="btn btn-primary" id="btn-leave-groupA">Leave Group-A</button>
+    </div>
+    <div>
+        <button class="btn btn-secondary" id="btn-message-groupA">Message to Group-A</button>
+    </div>
+    <br />
+    <div>
+        <button class="btn btn-primary" id="btn-join-groupB">Join Group-B</button>
+        <button class="btn btn-primary" id="btn-leave-groupB">Leave Group-B</button>
+    </div>
+    <div>
+        <button class="btn btn-secondary" id="btn-message-groupB">Message to Group-B</button>
+    </div>
+    <br />
+    @*   <div>
+        <button class="btn btn-primary" id="btn-typed-message">Typed Message</button>
+    </div> *@
+</div>
+
+
+<div id="message-form">
+    <label for="message-header">Header</label>
+    <input type="text" id="message-header" name="header"><br>
+
+    <label for="message-body">Body</label>
+    <input type="text" id="message-body" name="body"><br>
+
+
+
+    <button id="btn-typed-message">Send Message</button>
+</div>

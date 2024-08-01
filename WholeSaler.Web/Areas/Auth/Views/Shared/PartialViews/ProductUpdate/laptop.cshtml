@@ -1,0 +1,77 @@
+﻿@model WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.ProductEditVM
+@{
+}
+
+<h6>Partial view</h6>
+
+    <div class="form-group">
+        <label asp-for="Laptop.Name"></label>
+        <input asp-for="Laptop.Name" class="form-control" value="@Model.Laptop.Name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Laptop.Brand"></label>
+        <input asp-for="Laptop.Brand" class="form-control" value="@Model.Laptop.Brand" />
+        <span asp-validation-for="Laptop.Brand" class="text-danger"></span>
+
+    </div>
+    <div class="form-group">
+        <label asp-for="Laptop.Color"></label>
+        <input asp-for="Laptop.Color" class="form-control" value="@Model.Laptop.Color" />
+        <span asp-validation-for="Laptop.Color" class="text-danger"></span>
+
+    </div>
+    <div class="form-group">
+        <label>Product Images</label>
+        <input type="file" class="form-control" name="productImages" multiple>
+        <span class="text-muted">You should use "ctrl" to choose more than one image.</span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Laptop.Stock"></label>
+        <input asp-for="Laptop.Stock" class="form-control" value="@Model.Laptop.Stock" />
+        <span asp-validation-for="Laptop.Stock" class="text-danger"></span>
+
+    </div>
+    <div class="form-group">
+        <label asp-for="Laptop.UnitPrice"></label>
+        <input asp-for="Laptop.UnitPrice" class="form-control" value="@Model.Laptop.UnitPrice" />
+        <span asp-validation-for="Laptop.UnitPrice" class="text-danger"></span>
+
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Laptop.Description"></label>
+        <input asp-for="Laptop.Description" class="form-control" value="@Model.Laptop.Description" />
+        <span asp-validation-for="Laptop.Description" class="text-danger"></span>
+
+    </div>
+    <div class="form-group">
+        <label asp-for="Laptop.RAM"></label>
+        <input asp-for="Laptop.RAM" class="form-control" value="@Model.Laptop.RAM" />
+        <span asp-validation-for="Laptop.RAM" class="text-danger"></span>
+
+    </div>
+    <div class="form-group">
+        <label asp-for="Laptop.Processor"></label>
+        <input asp-for="Laptop.Processor" class="form-control" value="@Model.Laptop.Processor" />
+        <span asp-validation-for="Laptop.Processor" class="text-danger"></span>
+
+    </div>
+
+
+
+<input type="text" asp-for="Laptop.Id" value="@Model.Laptop.Id">
+<input type="text" asp-for="Laptop.Type" value="@Model.Laptop.Type">
+<input type="text" asp-for="Laptop.SumOfSales" value="@Model.Laptop.SumOfSales">
+    <input type="text" asp-for="Laptop.Category.CategoryId" value="@Model.Laptop.Category.CategoryId">
+    <input type="text" asp-for="Laptop.Category.CategoryName" value="@Model.Laptop.Category.CategoryName">
+    <input type="text" asp-for="Laptop.Category.SubCategory.Id" value="@Model.Laptop.Category.SubCategory.Id">
+    <input type="text" asp-for="Laptop.Category.SubCategory.Name" value="@Model.Laptop.Category.SubCategory.Name">
+    <input type="text" asp-for="Laptop.Store.StoreName" value="@Model.Laptop.Store.StoreName">
+    <input type="text" asp-for="Laptop.Store.StoreId" value="@Model.Laptop.Store.StoreId">
+
+  
+
+

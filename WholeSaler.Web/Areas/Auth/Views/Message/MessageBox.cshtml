@@ -1,0 +1,70 @@
+﻿@model List<string>
+@{
+    ViewData["Title"] = "MessageBox";
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+    var userName = ViewBag.UserName;
+}
+<style>
+    #messageContainer {
+        max-height: 500px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column-reverse; /* Reverse the flex direction */
+    }
+
+    #messageList {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <h3>Senders</h3>
+            <div id="senderList">
+                @foreach (var senderName in Model)
+                {
+                   <div style="margin-top:5px">
+
+                    <a class="btn btn-primary sender-link" href="javascript:void(0);" data-sender="@senderName">@senderName</a>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-md-8" style="background-color:bisque; max-height: 500px; overflow-y: auto;" id="messageContainer">
+           
+            <div id="messageList" style="margin-top:5px">
+                <!-- Messages will be loaded here dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const senderLinks = document.querySelectorAll(".sender-link");
+
+        senderLinks.forEach(link => {
+            link.addEventListener("click", function () {
+                const sender = this.getAttribute("data-sender");
+                loadMessages(sender);
+            });
+        });
+    });
+
+    function loadMessages(sender) {
+        fetch(`/auth/message/ReceivedMessageFrom?sender=${sender}`)
+            .then(response => response.text())
+            .then(data => {
+                const messageList = document.getElementById("messageList");
+                messageList.innerHTML = data;
+
+                // Scroll to the bottom of the message list after content is rendered
+                setTimeout(() => {
+                    const messageContainer = document.getElementById("messageContainer");
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
+                }, 0);
+            })
+            .catch(error => console.error('Error fetching messages:', error));
+    }
+</script>

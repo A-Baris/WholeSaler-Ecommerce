@@ -14,5 +14,6 @@ namespace WholeSaler.Entity.Entities.MongoIdentity
     {
         public List<Adress> Address { get; set; }
         public string? StoreId { get; set; }
+        public string? ConnectionId { get; set; }
     }
 }

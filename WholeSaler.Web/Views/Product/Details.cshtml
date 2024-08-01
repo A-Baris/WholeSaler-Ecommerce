@@ -92,7 +92,7 @@
                     <input name="UserId" value="@userId" hidden />
                     <input name="Id" value="@Model.Id" hidden />
                     <input name="Name" value="@Model.Name" hidden />
-                    <input name="colour" value="@Model.Colour" hidden />
+                        <input name="colour" value="@Model.Color" hidden />
                     <input name="Description" value="@Model.Description" hidden />
                     <input name="sumOfSales" value="@Model.SumOfSales" hidden />
                     <input name="unitPrice" value="@Model.UnitPrice" hidden />
@@ -119,7 +119,12 @@
 
 
 
+<div class="col-md-8">
+        <button id="showFeaturesBtn">Show Product Features</button>
+    <div id="productFeatures">
 
+    </div>
+</div>
 
 <div class="col-md-8">
 
@@ -254,5 +259,27 @@
                 })
                 .catch(error => console.error('Error:', error));
         });
+    });
+
+    document.getElementById('showFeaturesBtn').addEventListener('click', function () {
+        // Fetch product data from the API
+        var prdId = '@Model.Id'
+        fetch(`https://localhost:7185/api/product/${prdId}`)
+            .then(response => response.json())
+            .then(data => {
+                const productFeaturesDiv = document.getElementById('productFeatures');
+                let htmlContent = `<h3>${data.name}</h3>`;
+                const excludeProperties = ['name', 'category', 'store','images','id']; 
+
+                for (const [key, value] of Object.entries(data)) {
+                    if (!excludeProperties.includes(key)) { // Exclude specified properties
+                        htmlContent += `<p>${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}</p>`;
+                    }
+                }
+
+                productFeaturesDiv.innerHTML = htmlContent;
+                productFeaturesDiv.classList.remove('hidden');
+            })
+            .catch(error => console.error('Error fetching product data:', error));
     });
 </script>

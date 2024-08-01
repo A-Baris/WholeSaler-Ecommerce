@@ -1,0 +1,13 @@
+﻿
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var categories = ViewBag.Categories as List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>;
+}
+<select>
+@foreach(var category in categories)
+{
+    <option value="@category.Name" name="categoryName">@category.Name</option>
+}
+</select>
+

@@ -13,11 +13,11 @@ using WholeSaler.Entity.Entities.Enums;
 
 namespace WholeSaler.Business.ConcreteServices
 {
-    public class StoreServiceWithRedis : MongoDBWithRedis<Store>, IStoreServiceWithRedis
+    public class StoreServiceWithRedis : MongoWithRedisRepo<Store>, IStoreServiceWithRedis
     {
        
     
-        public StoreServiceWithRedis(IRedis_Cache<Store> redis, IMongoDBRepo<Store> mongoDB) : base(redis, mongoDB)
+        public StoreServiceWithRedis(IRedis_Cache<Store> redis, BaseMongoDBRepo<Store> mongoDB) : base(redis, mongoDB)
         {
 
             

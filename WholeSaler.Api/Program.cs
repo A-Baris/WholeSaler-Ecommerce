@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Identity;
 
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 Log.Logger = new LoggerConfiguration()
@@ -97,5 +98,7 @@ app.UseAuthorization();
 app.UseCors("MyCorsPolicy");
 
 app.MapControllers();
+app.UseRouting();
+
 
 app.Run();

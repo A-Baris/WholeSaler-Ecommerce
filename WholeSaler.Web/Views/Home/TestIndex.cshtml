@@ -1,0 +1,66 @@
+﻿@model IEnumerable<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>
+@{
+    ViewData["Title"] = "TestIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .category {
+        display: inline-block;
+        margin: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+
+    .subcategory-container {
+   /*      display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1; */
+        display: none;
+        position: absolute;
+        top: 100%; /* Position below the category */
+        left: 0;
+        background-color: white;
+        border: 1px solid #ccc;
+        min-width: 100%; /* Ensures the minimum width is the width of the category */
+        z-index: 1000; /* En
+    }
+
+    .subcategory {
+        padding: 12px 16px;
+    }
+
+    .category:hover .subcategory-container {
+        display: block;
+    }
+</style>
+
+<div>
+    @foreach (var category in Model)
+    {
+        <div class="category">
+            @category.Name
+            <div class="subcategory-container">
+                @foreach (var subCategory in category.SubCategories)
+                {
+                    <div class="subcategory">@subCategory.Name</div>
+                }
+            </div>
+        </div>
+    }
+</div>
+<script>
+    document.querySelectorAll('.category').forEach(category => {
+        category.addEventListener('mouseover', () => {
+            category.querySelector('.subcategory-container').style.display = 'block';
+        });
+
+        category.addEventListener('mouseout', () => {
+            category.querySelector('.subcategory-container').style.display = 'none';
+        });
+    });
+</script>
+

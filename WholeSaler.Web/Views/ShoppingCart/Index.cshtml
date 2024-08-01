@@ -3,12 +3,13 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var cartId = ViewData["ShoppingCartId"] as string;
-    var userId = ViewData["UserId"] as string;
+    var userId = ViewData["Uid"] as string;
+    var visitorId = ViewData["VisitorId"] as string;
     decimal? totalPriceOfProduct = 0;
 
     var counter = 0;
 }
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <h1>Alışveriş Sepeti</h1>
 <div class="row">
     <form id="productForm" asp-action="edit" asp-controller="shoppingcart" method="post" enctype="multipart/form-data">
@@ -37,15 +38,15 @@
                         <td>
                             @if(prd.Images == null || !prd.Images.Any())
                             {
-                            <img src="~/images/exampleimage.jpg" alt="Denim Jeans" style="width:100%;height:100px">
+                            <img src="~/images/exampleimage.jpg" alt="#" style="width:100%;height:100px">
                             }
                             else
                             {
                             <img src="~/images/products/@prd.Images[0].FileName" alt="Denim Jeans" style="width:100%;height:100px">
                             }
                             </td>
-                        <td id="productName">@prd.Name</td>
-                        <td id="productColour">@prd.Colour</td>
+                        <td id="productName"><a asp-action="details" asp-controller="product" asp-route-productId="@prd.Id" style="color:black;text-decoration:none"><b>@prd.Name</b></a></td>
+                        <td id="productColour">@prd.Color</td>
                         <td id="productUnitPrice">@prd.UnitPrice TL</td>
                         <td>
                             <button type="button" id="btnMinus-{@prd.Id}" class="btn btn-sm btn-danger">-</button>
@@ -53,11 +54,12 @@
                             <button type="button" id="btnPlus-{@prd.Id}" class="btn btn-sm btn-primary">+</button>
 
                         </td>
-                        <td id="productStoreStoreName">@prd.Store?.StoreName</td>
+                        <td id="productStoreStoreName"><a asp-action="index" asp-controller="store" asp-route-storeId="@prd.Store.StoreId" style="color:black;text-decoration:none"><b>@prd.Store?.StoreName</b></a></td>
 
-                        <td id="totalProductPrice">@((prd.UnitPrice * prd.Quantity)) TL</td>
+                        <td id="totalProductPrice">@string.Format("{0:F2}",((prd.UnitPrice * prd.Quantity))) TL</td>
                         @* <td><button type="button" class="btn btn-outline-info drop-product-btn" data-product-id="@prd.Id">Drop The Product</button></td> *@
-                        <td><a href="/ShoppingCart/DeleteTheProductInCart?cartId=@cartId&productId=@prd.Id" type="button" class="btn btn-outline-secondary"><p><span class="glyphicon glyphicon-trash"></span></p></a></td>
+                        <td><a href="/ShoppingCart/DeleteTheProductInCart?cartId=@cartId&productId=@prd.Id" title="Delete" style="color:black">Delete</a></td>
+
 
                     </tr>
                     <input type="hidden" id="quantityInput-{@prd.Id}" name="products[@counter].quantity" value="@prd.Quantity">
@@ -79,7 +81,7 @@
         </table>
     </form>
     <div>
-        <div style="float:right"  id="totalAmount"><h6>Sepet Toplam Tutar : @totalPriceOfProduct TL</h6></div>     
+        <div style="float:right"  id="totalAmount"><h6>Sepet Toplam Tutar : @String.Format("{0:F2}", totalPriceOfProduct) TL</h6></div>     
     </div>
     <div>
   

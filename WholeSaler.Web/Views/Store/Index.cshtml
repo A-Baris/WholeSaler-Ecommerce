@@ -139,7 +139,7 @@
                                 <input name="Name" value="@item.Name" hidden />
                                 <h5>@item.Name</h5>
                             </a>
-                            <input name="colour" value="@item.Colour" hidden />
+                            <input name="colour" value="@item.Color" hidden />
                             <input name="sumOfSales" value="@item.SumOfSales" hidden />
                             <input name="unitPrice" value="@item.UnitPrice" hidden />
                             <input name="stock" value="@item.Stock" hidden />
@@ -165,6 +165,9 @@
         <h4>@storeInfo.Name</h4>
         <h5>@storeInfo.Adress?.City</h5>
         <h6>@storeInfo.Email</h6>
+        <div>
+            <a class="btn btn-primary" href="/user/SendMessage?receiverId=@storeId&receiverName=@storeInfo.Name"></a>
+        </div>
     </div>
 </div>
 <script>

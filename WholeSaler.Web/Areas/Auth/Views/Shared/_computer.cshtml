@@ -1,0 +1,28 @@
+﻿@model WholeSaler.Web.Areas.Auth.Models.ViewModels.ClothingVM
+
+@using (Html.BeginForm("Computer", "Product", FormMethod.Post))
+{
+    @Html.ValidationSummary(true)
+
+    <div>
+        @Html.LabelFor(model => model.Name)
+        @Html.TextBoxFor(model => model.Name)
+        @Html.ValidationMessageFor(model => model.Name)
+    </div>
+    <div>
+        @Html.LabelFor(model => model.Size)
+        @Html.TextBoxFor(model => model.Size)
+        @Html.ValidationMessageFor(model => model.Size)
+    </div>
+    <div>
+        @Html.LabelFor(model => model.Color)
+        @Html.TextBoxFor(model => model.Color)
+        @Html.ValidationMessageFor(model => model.Color)
+    </div>
+    <div>
+        @Html.LabelFor(model => model.Material)
+        @Html.TextBoxFor(model => model.Material)
+        @Html.ValidationMessageFor(model => model.Material)
+    </div>
+    <button type="submit">Create Computer</button>
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -7,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using WholeSaler.Web.Areas.Admin.Models.ViewModels.Store;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Category;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Store;
@@ -17,6 +19,7 @@ using WholeSaler.Web.Utility;
 namespace WholeSaler.Web.Areas.Auth.Controllers
 {
     [Area("auth")]
+    [Authorize(Roles = "storeManager,admin")]
     public class StoreController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -38,7 +41,26 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
         public async Task<IActionResult> Index()
         
         {
-           
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userManager.FindByIdAsync(userId);
+
+            var getStoreUri = $"https://localhost:7185/api/store/mystore/{userId}";
+            var response =await _httpClient.GetAsync(getStoreUri);
+            if (response.IsSuccessStatusCode)
+            {
+                var storeJson = await response.Content.ReadAsStringAsync();
+                var storeData = JsonConvert.DeserializeObject<StoreVM>(storeJson);
+                if (storeData.AdminConfirmation != Admin.Models.Enums.AdminConfirmation.Accepted)
+                {
+                    return RedirectToAction("applicationdetails", "store");
+                }
+                else
+                {
+                    return View();
+                }
+            }
+
+
             return View();
         }
 

@@ -4,12 +4,14 @@ using SharpCompress.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using WholeSaler.Business.AbstractRepo;
 using WholeSaler.Business.Logger;
 using WholeSaler.Entity.Entities;
 using WholeSaler.Entity.Entities.Enums;
+using WholeSaler.Entity.Entities.Products;
 
 namespace WholeSaler.Business.ConcreteRepo
 {
@@ -93,37 +95,130 @@ namespace WholeSaler.Business.ConcreteRepo
             }
         }
 
+
+        //public async Task<T> Update(T entity)
+        //{
+        //    try
+        //    {
+        //        var idProperty = typeof(T).GetProperty("Id");
+        //        if (idProperty == null)
+        //        {
+        //            throw new InvalidOperationException("Entity does not have an Id property.");
+        //        }
+
+        //        var idValue = idProperty.GetValue(entity);
+        //        if (idValue == null)
+        //        {
+        //            throw new InvalidOperationException("Entity Id value is null.");
+        //        }
+
+        //        var filter = Builders<T>.Filter.Eq("Id", idValue);
+        //        var existingEntity = await _collection.Find(filter).FirstOrDefaultAsync();
+
+        //        if (existingEntity != null)
+        //        {
+        //            // Use reflection to get the properties of the entity
+        //            var entityType = typeof(T);
+        //            var properties = entityType.GetProperties();
+
+        //            // Create an UpdateDefinition builder
+        //            var updateDefinitionBuilder = Builders<T>.Update;
+
+        //            // Create an empty UpdateDefinition
+        //            UpdateDefinition<T> updateDefinition = null;
+
+        //            foreach (var property in properties)
+        //            {
+        //                var newValue = property.GetValue(entity);
+        //                var oldValue = property.GetValue(existingEntity);
+
+        //                // Update only if the new value is not null and different from the old value
+        //                if (newValue != null && !newValue.Equals(oldValue))
+        //                {
+        //                    if (updateDefinition == null)
+        //                    {
+        //                        updateDefinition = updateDefinitionBuilder.Set(property.Name, newValue);
+        //                    }
+        //                    else
+        //                    {
+        //                        updateDefinition = updateDefinition.Set(property.Name, newValue);
+        //                    }
+        //                }
+        //            }
+
+        //            // Add the UpdatedDate field to the update
+        //            if (updateDefinition != null)
+        //            {
+        //                updateDefinition = updateDefinition.Set("UpdatedDate", DateTime.Now);
+        //            }
+        //            else
+        //            {
+        //                updateDefinition = updateDefinitionBuilder.Set("UpdatedDate", DateTime.Now);
+        //            }
+
+        //            if (updateDefinition != null)
+        //            {
+        //                try
+        //                {
+        //                    await _collection.UpdateOneAsync(filter, updateDefinition);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    _logger.LogError($"#MongoDBRepo while Update [Id]:{idValue}", ex);
+        //                    throw;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                _logger.LogInformation($"No fields to update for entity with [Id]:{idValue}");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            throw new InvalidOperationException("Entity is not found.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError($"#MongoDBRepo while Update general", ex);
+        //        throw;
+        //    }
+        //    return entity;
+        //}
+
         public async Task<T> Update(T entity)
         {
             try
             {
                 var filter = Builders<T>.Filter.Eq("Id", entity.Id);
                 var existingEntity = await _collection.Find(filter).FirstOrDefaultAsync();
-
                 if (existingEntity != null)
                 {
-                    entity.CreatedDate = existingEntity.CreatedDate;
-                    entity.UpdatedDate = DateTime.Now;
-                    try
+                    // Iterate through each property of the entity
+                    foreach (PropertyInfo property in typeof(T).GetProperties())
                     {
-                        await _collection.ReplaceOneAsync(filter, entity);
+                        // Get the value of the current property in the entity
+                        var newValue = property.GetValue(entity);
+
+                        // Check if the new value is not null or empty (for string properties)
+                        if (newValue != null && !(newValue is string strValue && string.IsNullOrEmpty(strValue)))
+                        {
+                            // Set the value to the existing entity
+                            property.SetValue(existingEntity, newValue);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError($"#MongoDBRepo while Update [Id]:{entity.Id}", ex);
-                        throw;
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException("Entity is not found.");
+
+                    // Replace the existing entity in the collection
+                    await _collection.ReplaceOneAsync(filter, existingEntity);
+                    return existingEntity;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"#MongoDBRepo while Update general",ex);
-                throw;
+                // Handle exceptions
+                Console.WriteLine($"An error occurred: {ex.Message}");
             }
+
             return entity;
         }
 

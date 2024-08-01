@@ -91,7 +91,7 @@
                     </div>
                 </td>
                 <td id="productName"><a asp-action="previewProduct" asp-controller="product" asp-area="auth" asp-route-id="@prd.Id">@prd.Name</a></td>
-                <td id="productColour">@prd.Colour</td>
+                <td id="productColour">@prd.Color</td>
                 <td id="productUnitPrice">@prd.UnitPrice TL</td>
                 <td id="productStock">@prd.Stock</td>
                 <td id="productSumOfSales">@prd.SumofSales</td>
@@ -112,7 +112,7 @@
               /
                     <a class="btn btn-secondary btn-sm" href="/auth/product/changeStatus?id=@prd.Id&statusCode=1">Passive</a>
                 </td>
-                <td><a class="btn btn-outline-warning" href="/auth/product/edit/@prd.Id">Edit</a> <a class="btn btn-outline-danger" href="/auth/product/delete/@prd.Id">Delete</a></td>
+                <td><a class="btn btn-outline-warning" href="/auth/product/edit?id=@prd.Id">Edit</a> <a class="btn btn-outline-danger" href="/auth/product/delete?productId=@prd.Id">Delete</a></td>
                
 
 

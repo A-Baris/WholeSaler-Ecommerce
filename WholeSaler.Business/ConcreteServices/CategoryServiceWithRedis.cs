@@ -11,9 +11,9 @@ using WholeSaler.Entity.Entities;
 
 namespace WholeSaler.Business.ConcreteServices
 {
-    public class CategoryServiceWithRedis : MongoDBWithRedis<Category>, ICategoryServiceWithRedis
+    public class CategoryServiceWithRedis : MongoWithRedisRepo<Category>, ICategoryServiceWithRedis
     {
-        public CategoryServiceWithRedis(IRedis_Cache<Category> redis, IMongoDBRepo<Category> mongoDB) : base(redis, mongoDB)
+        public CategoryServiceWithRedis(IRedis_Cache<Category> redis, BaseMongoDBRepo<Category> mongoDB) : base(redis, mongoDB)
         {
         }
     }

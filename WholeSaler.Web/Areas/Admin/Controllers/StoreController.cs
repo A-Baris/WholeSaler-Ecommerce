@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 using WholeSaler.Web.Areas.Admin.Models.ViewModels.Store;
+using WholeSaler.Web.Utility;
 
 namespace WholeSaler.Web.Areas.Admin.Controllers
 {
@@ -31,11 +33,12 @@ namespace WholeSaler.Web.Areas.Admin.Controllers
             return View();
         }
         [HttpGet]
+        [Authorize(Roles ="admin")]
         public async Task<IActionResult> ApproveApplication(string storeId)
         {
             
             var approveStoreUri = $"https://localhost:7185/api/store/ApproveApplication/{storeId}";
-  
+            SetAuthHeader.SetAuthorizationHeader(_httpClient, Request);
             var result = await _httpClient.GetAsync(approveStoreUri);
             if (result.IsSuccessStatusCode)
             {

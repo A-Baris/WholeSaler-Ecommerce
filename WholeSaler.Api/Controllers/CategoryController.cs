@@ -83,6 +83,7 @@ namespace WholeSaler.Api.Controllers
 
         }
       
+        //[Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<IActionResult> Create(Category category)
         {
@@ -114,7 +115,8 @@ namespace WholeSaler.Api.Controllers
 
 
         }
-        [HttpPut]
+        [HttpPut("edit")]
+        
         public async Task<IActionResult> Update(Category category)
         {
             try
@@ -145,7 +147,8 @@ namespace WholeSaler.Api.Controllers
 
 
         }
-        [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             try

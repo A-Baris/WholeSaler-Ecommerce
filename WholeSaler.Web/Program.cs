@@ -11,6 +11,8 @@ using WholeSaler.Web.FluentValidation.Configs;
 using System.Net;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using WholeSaler.Web.CustomMiddleWares;
+using WholeSaler.Web.Hubs;
+using WholeSaler.Web.Models.ViewModels.Product.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -23,21 +25,10 @@ builder.Services.AddIdentity<AppUser, AppRole>()
 
 
 
-//.AddJwtBearer(options =>
-//  {
-//      options.TokenValidationParameters = new TokenValidationParameters
-//      {
-//          ValidateIssuer = true,
-//          ValidateAudience = true,
-//          ValidateLifetime = true,
-//          ValidateIssuerSigningKey = true,
-//          ValidIssuer = builder.Configuration["Jwt:Issuer"],
-//          ValidAudience = builder.Configuration["Jwt:Audience"],
-//          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
-//      };
-//  });
+
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddControllersWithViews().AddFluentValidation(x => x.RegisterValidatorsFromAssemblyContaining<Program>());
+builder.Services.AddSignalR();
 
 builder.Services.AddTransient(typeof(IValidationService<>), typeof(ValidationService<>));
 
@@ -48,6 +39,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie("WholeSalerCookie", x =>
     {
     x.LoginPath = "/user/Login";
+        x.LogoutPath = "/home/index";
+     
     x.AccessDeniedPath = "/user/Login";
     x.Cookie = new CookieBuilder
     {
@@ -79,11 +72,17 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.MapHub<MessageHub>("/messagehub");
 app.UseRouting();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllerRoute(
+    name: "category",
+    pattern: "Category/{categoryName}/{subCategoryName?}",
+    defaults: new { controller = "Home", action = "category" });
+
+
 
 app.UseEndpoints(endpoints =>
 {

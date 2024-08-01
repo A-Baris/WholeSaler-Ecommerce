@@ -10,7 +10,10 @@ namespace WholeSaler.Business.AbstractServices
 {
     public interface IProductServiceWithRedis:IMongoDBWithRedis<Product>
     {
-         Task<List<Product>> GetTheStoreWithPRoducts(string storeId);
-      
+         Task<List<Product>> GetTheStoreWithProducts(string storeId);
+        Task<Product> GetProductForReview(string id);
+        Task<Product> GetProduct(string id);
+
+
     }
 }

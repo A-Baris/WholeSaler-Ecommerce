@@ -1,96 +1,110 @@
-﻿@model WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.ProductCreateVM
+﻿@model ProductComprehensiveVM
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Test";
     Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
     var storeId = ViewData["StoreId"];
     var storeName = ViewData["StoreName"];
+ 
+   
 }
 
-<h1>Create</h1>
+   
+<div class="form-group">
+    <label>Kategori</label>
+    <select class="form-control" id="categorySelect">
+        <option>Kategori Seçiniz</option>
+    </select>
+</div>
+<div class="form-group">
+    <label>Alt Kategori</label>
+    <select class="form-control" id="subCategorySelect">
+        <option id="subCategoryOption">Alt Kategori Seçiniz</option>
+    </select>
+</div>
 
 
+<form asp-controller="product" asp-action="create" asp-area="auth" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
 
-    <form method="post" asp-action="create" asp-controller="product" asp-area="auth" enctype="multipart/form-data">
-        <div class="form-group">
-            <label asp-for="Name"></label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
 
-        </div>
-        <div class="form-group">
-            <label asp-for="Colour"></label>
-            <input asp-for="Colour" class="form-control" />
-            <span asp-validation-for="Colour" class="text-danger" ></span>
+    <div class="form-group">
+        <label asp-for="Brand"></label>
+        <input asp-for="Brand" class="form-control" />
+        <span asp-validation-for="Brand" class="text-danger"></span>
 
-        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="Color"></label>
+        <input asp-for="Color" class="form-control" />
+        <span asp-validation-for="Color" class="text-danger"></span>
+
+    </div>
     <div class="form-group">
         <label>Product Images</label>
         <input type="file" class="form-control" name="productImages" multiple>
         <span class="text-muted">You should use "ctrl" to choose more than one image.</span>
     </div>
-        <div class="form-group">
-            <label asp-for="Stock"></label>
-            <input asp-for="Stock" class="form-control" />
-            <span asp-validation-for="Stock" class="text-danger"></span>
-
-        </div>
-        <div class="form-group">
-            <label asp-for="UnitPrice"></label>
-            <input asp-for="UnitPrice" class="form-control" />
-            <span asp-validation-for="UnitPrice" class="text-danger"></span>
-
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Description"></label>
-            <input asp-for="Description" class="form-control" />
-            <span asp-validation-for="Description" class="text-danger"></span>
-
-        </div>
     <div class="form-group">
-        <label>Kategori</label>
-        <select id="categorySelect">
-            <option>Kategori Seçiniz</option>
-        </select>
+        <label asp-for="Stock"></label>
+        <input asp-for="Stock" class="form-control" />
+        <span asp-validation-for="Stock" class="text-danger"></span>
+
     </div>
-        <div class="form-group">
-            
-            <input asp-for="Store.StoreName" class="form-control" value="@storeName" />
-           
+    <div class="form-group">
+        <label asp-for="UnitPrice"></label>
+        <input asp-for="UnitPrice" class="form-control" />
+        <span asp-validation-for="UnitPrice" class="text-danger"></span>
 
-        </div>
-        <div class="form-group">
-            
-            <input asp-for="Store.StoreId" class="form-control" value="@storeId"  />          
+    </div>
 
-        </div>
-    <input type="text" id="nameInput" name="Category.CategoryName" >
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
 
-
-    <input type="text" id="idInput" name="Category.CategoryId" >
-
-           <div class="text-center">
-
-                    <button type="submit" class="btn btn-primary" style="margin-top:10px">Ürün Oluştur</button>
-           </div>
+    </div>
     
+
+<div id="productForm">
+    <!-- The partial view will be loaded here -->
    
-   
+</div>
+
+    <input type="text" id="categoryIdInput" asp-for="Category.CategoryId">
+    <input type="text" id="categoryNameInput" asp-for="Category.CategoryName">
+    <input type="text" id="subCategoryIdInput" asp-for="Category.SubCategory.Id">
+    <input type="text" id="subCategoryNameInput" asp-for="Category.SubCategory.Name">
+    <input type="text"  asp-for="Store.StoreName" value="@storeName">
+    <input type="text"  asp-for="Store.StoreId" value="@storeId">
+
+    <div class="text-center">
+
+        <button type="submit" class="btn btn-primary" style="margin-top:10px">Create</button>
+    </div>
+
+</form>
 
 
-    </form>
 
+    <script>
 
-
-
-<script>
-    // API'den kategorileri çekmek için bir GET isteği yap
     fetch('https://localhost:7185/api/category')
         .then(response => response.json())
         .then(data => {
-            
             const categorySelect = document.getElementById('categorySelect');
+            const subCategorySelect = document.getElementById('subCategorySelect');
+            const nameInput = document.getElementById('categoryNameInput');
+            const idInput = document.getElementById('categoryIdInput');
+            const subCategoryNameInput = document.getElementById('subCategoryNameInput');
+            const subCategoryIdInput = document.getElementById('subCategoryIdInput');
+
             console.log(data);
+
+            // Populate categories
             data.forEach(category => {
                 const option = document.createElement('option');
                 option.value = category.id;
@@ -100,22 +114,84 @@
 
             // Kategori seçildiğinde çalışacak olan fonksiyon
             function categorySelected() {
-                const selectedOption = document.getElementById('categorySelect').selectedOptions[0];
-                const nameInput = document.getElementById('nameInput');
-                const idInput = document.getElementById('idInput');
+                const selectedOption = categorySelect.selectedOptions[0];
 
-                // Seçilen kategorinin adını ve ID'sini alıp ilgili input alanlarına yerleştir
+                // // Seçilen kategorinin adını ve ID'sini alıp ilgili input alanlarına yerleştir
                 nameInput.value = selectedOption.textContent;
                 idInput.value = selectedOption.value;
+
+                // Seçilen kategoriye göre alt kategorileri doldur
+                const selectedCategory = data.find(category => category.id === selectedOption.value);
+
+                if (selectedCategory && selectedCategory.subCategories) {
+                    populateSubCategories(selectedCategory.subCategories);
+                } else {
+                    populateSubCategories([]);
+                }
+            }
+
+            // Alt kategorileri dolduran fonksiyon
+            function populateSubCategories(subCategories) {
+                // Alt kategori select elementini temizle
+                subCategorySelect.innerHTML = '';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Alt Kategori Seçiniz';
+                subCategorySelect.appendChild(defaultOption);
+
+                subCategories.forEach(subCategory => {
+                    const option = document.createElement('option');
+                    option.value = subCategory.id;
+                    option.textContent = subCategory.name;
+                    subCategorySelect.appendChild(option);
+                });
+            }
+
+            // Alt kategori seçildiğinde çalışacak olan fonksiyon
+            function subCategorySelected() {
+                const selectedOption = subCategorySelect.selectedOptions[0];
+
+                // // Seçilen alt kategorinin adını ve ID'sini alıp ilgili input alanlarına yerleştir
+                subCategoryNameInput.value = selectedOption ? selectedOption.textContent : '';
+                subCategoryIdInput.value = selectedOption ? selectedOption.value : '';
             }
 
             // Select alanındaki seçim değiştiğinde categorySelected fonksiyonunu çağır
-            document.getElementById('categorySelect').addEventListener('change', categorySelected);
+            categorySelect.addEventListener('change', categorySelected);
+
+            // Subcategory select alanındaki seçim değiştiğinde subCategorySelected fonksiyonunu çağır
+            subCategorySelect.addEventListener('change', subCategorySelected);
         })
         .catch(error => {
             console.error('Kategorileri alma işlemi başarısız oldu:', error);
         });
+
+
+
+
+
+
+
+
+        $(function () {
+            $('#subCategorySelect').change(function () {
+                var categoryId = $('#categorySelect').val();
+                var subCategoryId = $(this).val();
+            if (categoryId && subCategoryId) {
+                    $.ajax({
+                        url: '@Url.Action("Category", "Product")',
+                        type: 'GET',
+                        data: {
+                        categoryId: categoryId,
+                        subCategoryId: subCategoryId
+                        },
+                        success: function (data) {
+                            $('#productForm').html(data);
+                        }
+                    });
+                }
+            });
+        });
+
 </script>
-
-
-

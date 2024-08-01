@@ -1,22 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Security.Claims;
 using WholeSaler.Web.Areas.Admin.Models.ViewModels.Store;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Category;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Store;
+using WholeSaler.Web.FluentValidation.Configs;
 using WholeSaler.Web.Models.ViewModels.ShoppingCartVM;
+using WholeSaler.Web.MongoIdentity;
 
 namespace WholeSaler.Web.Controllers
 {
     public class StoreController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly IValidationService<StoreCreateVM> _storeCreateValidator;
         private readonly HttpClient _httpClient;
 
-        public StoreController(IHttpClientFactory httpClientFactory)
+        public StoreController(IHttpClientFactory httpClientFactory,UserManager<AppUser> userManager,IValidationService<StoreCreateVM> storeCreateValidator)
         {
            _httpClientFactory = httpClientFactory;
-           _httpClient = httpClientFactory.CreateClient();
+            _userManager = userManager;
+            _storeCreateValidator = storeCreateValidator;
+            _httpClient = httpClientFactory.CreateClient();
         }
         public async Task<IActionResult> Index(string storeId,string productName,string categoryName)
         {
@@ -91,17 +99,44 @@ namespace WholeSaler.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(StoreCreateVM createVM)
         {
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            if (userIdClaim != null)
+            var errors = _storeCreateValidator.GetValidationErrors(createVM);
+            if (errors.Any())
             {
-                var userId = userIdClaim.Value;
-                createVM.UserId = userId;
+                ModelStateHelper.AddErrorsToModelState(ModelState, errors);
+                return View(createVM);
+            }
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userManager.FindByIdAsync(userId);
+            if (userId == null)
+            {
+                return RedirectToAction("login", "user");
 
             }
+
+
+            createVM.UserId = userId;
+
             var uri = $"https://localhost:7185/api/store";
             var json = JsonConvert.SerializeObject(createVM);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(uri, content);
+            if (response.IsSuccessStatusCode) 
+            {
+                var jsonStore = await response.Content.ReadAsStringAsync();
+                var storeData = JsonConvert.DeserializeObject<StoreVM>(jsonStore);
+                user.StoreId = storeData.Id;
+               var updatedUser= _userManager.UpdateAsync(user);
+
+                return RedirectToAction("ApplicationDetails", "store");
+
+            }
+            //hata mesajı
+           return RedirectToAction("create","store");
+        }
+        [HttpGet]
+        public  IActionResult ApplicationDetails()
+        {
+          
             return View();
         }
     }

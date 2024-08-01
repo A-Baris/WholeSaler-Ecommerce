@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WholeSaler.Api", "WholeSale
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WholeSaler.IOC", "WholeSaler.IOC\WholeSaler.IOC.csproj", "{260FE83E-E940-4CE0-B5F7-017FCA79F5C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WholeSaler.Web", "WholeSaler.Web\WholeSaler.Web.csproj", "{80550B76-2D2A-47DE-8C55-C9185EBF64D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WholeSaler.Web", "WholeSaler.Web\WholeSaler.Web.csproj", "{80550B76-2D2A-47DE-8C55-C9185EBF64D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
