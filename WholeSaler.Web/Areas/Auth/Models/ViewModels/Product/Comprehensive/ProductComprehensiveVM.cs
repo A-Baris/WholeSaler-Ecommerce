@@ -18,9 +18,9 @@ namespace WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Comprehensive
         public string? Description { get; set; }
         public ProductCategoryVM? Category { get; set; }
         public ProductStoreVM? Store { get; set; }
-        public TelevisionVm? Television { get; set; }
-        public LaptopVM? Laptop { get; set; }
-        public PerfumeVM?  Perfume { get; set; }
+        public Television? Television { get; set; }
+        public Laptop? Laptop { get; set; }
+        public Perfume?  Perfume { get; set; }
 
     }
 }

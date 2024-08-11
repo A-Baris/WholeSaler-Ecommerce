@@ -24,6 +24,7 @@
 
 
 <form asp-controller="product" asp-action="create" asp-area="auth" method="post" enctype="multipart/form-data">
+    <div class="col-md-8">
     <div class="form-group">
         <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control" />
@@ -67,7 +68,7 @@
         <span asp-validation-for="Description" class="text-danger"></span>
 
     </div>
-    
+
 
 <div id="productForm">
     <!-- The partial view will be loaded here -->
@@ -85,7 +86,7 @@
 
         <button type="submit" class="btn btn-primary" style="margin-top:10px">Create</button>
     </div>
-
+    </div>
 </form>
 
 

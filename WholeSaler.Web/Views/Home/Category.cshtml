@@ -1,5 +1,5 @@
 ﻿@using Newtonsoft.Json
-@using WholeSaler.Web.Models.ViewModels.Product.Filters.Electronics
+@* @using WholeSaler.Web.Models.ViewModels.Product.Filters.Electronics *@
 @model List<WholeSaler.Web.Models.ViewModels.ShoppingCartVM.ProductForCartVM>
 @{
     ViewData["Title"] = "Index";
@@ -12,10 +12,10 @@
     var noCartMessage = TempData["NoCartMessage"] as string;
     var productNameMessage = TempData["productNameMessage"] as string;
     var categories = ViewBag.Categories;
-    var productFilters = ViewBag.ProductFilterVM as WholeSaler.Web.Models.ViewModels.Product.ProductForFilter;
-    // var nonNullProperties = productFilters?.GetNonNullProperties();
+    var productFilters = ViewBag.ProductFilterVM;
 
-var filterVm=  ViewBag.FilterVM as WholeSaler.Web.Models.ViewModels.Product.Filters.BaseProductFilterVM;
+
+// var filterVm=  ViewBag.FilterVM as WholeSaler.Web.Models.ViewModels.Product.Filters.BaseProductFilterVM;
 
 
 }
@@ -122,7 +122,7 @@ var filterVm=  ViewBag.FilterVM as WholeSaler.Web.Models.ViewModels.Product.Filt
 
     <div class="row">
 
-        <div class="col-md-3" style="border:solid;height:750px;">
+        <div class="col-md-2" style="border:solid;height:750px;">
             @* filtreleme sistemi uygula*@
             <form asp-action="category" asp-controller="home" method="post">
                 @if (subCategoryName!=null)
@@ -137,23 +137,20 @@ var filterVm=  ViewBag.FilterVM as WholeSaler.Web.Models.ViewModels.Product.Filt
                 <input type="type" name="categoryName" value="@categoryName" hidden/>
                 <input type="type" name="subCategoryName" value="@subCategoryName" hidden />
 
-                <div>
-                    <button type="submit">Filtered</button>
+                <div class="text-center">
+                    <button class="btn btn-outline-info" type="submit" style="margin-top:5px">Filtered</button>
                 </div>
              
 
             </form>
-         @*    @if (nonNullProperties != null)
+     
+            @if (productFilters != null)
             {
-                @foreach (var item in nonNullProperties)
-                {
-                    <h5>@($"{item.Key}: {item.Value}")</h5>
-                }
-            } *@
-          
-
-
-
+                foreach (var property in productFilters)
+            {
+            <h6>@property.Key : @property.Value</h6> 
+            }
+            }
 
         </div>
         <div class="col-md-9" id="productDiv">
@@ -240,7 +237,7 @@ var filterVm=  ViewBag.FilterVM as WholeSaler.Web.Models.ViewModels.Product.Filt
                                     <input name="store.storeId" value="@item.Store?.StoreId" hidden />
                                     <input name="category.categoryname" value="@item.Category?.CategoryName" hidden />
                                     <input name="category.categoryId" value="@item.Category?.CategoryId" hidden />
-                                    <input type="hidden" name="returnUrl" value="@Url.Action("Category", new { categoryName = categoryName, subCategoryName = subCategoryName, filter = JsonConvert.SerializeObject(productFilters) })" />
+                                  @*   <input type="hidden" name="returnUrl" value="@Url.Action("Category", new { categoryName = categoryName, subCategoryName = subCategoryName, filter = JsonConvert.SerializeObject(productFilters) })" /> *@
                                    
 
                                 </div>

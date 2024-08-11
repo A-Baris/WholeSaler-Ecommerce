@@ -1,0 +1,47 @@
+﻿@model List<WholeSaler.Web.Areas.Admin.Models.ViewModels.Store.StoreVM>
+@{
+    ViewData["Title"] = "ConfirmStoreApplication";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<div class="col-md-12">
+<table class="table-bordered">
+
+    <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>City</th>
+            <th>District</th>
+            <th>Phone</th>
+            <th>Tax Number</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var store in Model)
+
+        {
+
+
+
+
+            <tr>
+
+                <td>@store.Name</td>
+                <td>@store.Adress?.City</td>
+                <td>@store.Adress?.District</td>
+                <td>@store.Phone</td>
+                <td>@store.TaxNumber</td>
+                <td>@store.AdminConfirmation</td>
+                <td>
+
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+</div>

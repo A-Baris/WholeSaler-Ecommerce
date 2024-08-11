@@ -10,6 +10,7 @@ using System.Reflection;
 using WholeSaler.Api.Controllers.Base;
 using WholeSaler.Api.DTOs;
 using WholeSaler.Api.DTOs.ProductDTOs;
+using WholeSaler.Api.DTOs.ProductDTOs.FilterProducts;
 using WholeSaler.Api.DTOs.ProductDTOs.TProducts;
 using WholeSaler.Api.Helpers.ProductHelper;
 using WholeSaler.Business.AbstractServices;
@@ -67,7 +68,51 @@ namespace WholeSaler.Api.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        
+        [HttpGet("getforfilter")]
+        public async Task<IActionResult> GetProductsForFilter()
+        {
+            try
+            {
+                var products = await _productService.GetAll();
+           
+
+                var productGeneral = new ProductFilterDto();
+
+                foreach (var product in products)
+                {
+                    switch (product.Type)
+                    {
+                        case "Television":
+                            productGeneral.Televisions.Add(JsonConvert.DeserializeObject<Television>(JsonConvert.SerializeObject(product)));
+                            break;
+                        case "Laptop":
+                            productGeneral.Laptops.Add(JsonConvert.DeserializeObject<Laptop>(JsonConvert.SerializeObject(product)));
+                            break;
+                        case "Perfume":
+                            productGeneral.Perfumes.Add(JsonConvert.DeserializeObject<Perfume>(JsonConvert.SerializeObject(product)));
+                            break;
+                    }
+                }
+
+                if (products.Any())
+                {
+                    return Ok(productGeneral);
+                }
+                return Ok(null);
+
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError($"#{controllerName} GetAll - {ex.Message}", ex);
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"#{controllerName} GetAll - {ex.Message}", ex);
+                return StatusCode(500, ex.Message);
+            }
+        }
+
 
 
         [HttpGet("{id}")]

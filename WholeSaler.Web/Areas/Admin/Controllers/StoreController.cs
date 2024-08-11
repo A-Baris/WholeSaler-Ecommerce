@@ -19,6 +19,19 @@ namespace WholeSaler.Web.Areas.Admin.Controllers
             _httpClient = _httpClientFactory.CreateClient();
         }
         [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var getAllStoreUri = "https://localhost:7185/api/store";
+            var result = await _httpClient.GetAsync(getAllStoreUri);
+            if (result.IsSuccessStatusCode)
+            {
+                var json = await result.Content.ReadAsStringAsync();
+                var stores = JsonConvert.DeserializeObject<List<StoreVM>>(json);
+                return View(stores);
+            }
+            return View();
+        }
+        [HttpGet]
         public async Task<IActionResult> StoreApplications()
         {
             var getStoresUri = "https://localhost:7185/api/store";

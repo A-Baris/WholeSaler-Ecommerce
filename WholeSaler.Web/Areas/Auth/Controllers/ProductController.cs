@@ -16,13 +16,12 @@ using WholeSaler.Web.Areas.Auth.Models.ViewModels.Store;
 using WholeSaler.Web.Helpers.CookieHelper;
 using WholeSaler.Web.Helpers.IdentyClaims;
 using WholeSaler.Web.Helpers.ImageHelper;
-using WholeSaler.Web.Models.ViewModels.Product.Filters.Electronics;
-using WholeSaler.Web.Models.ViewModels.Product.Filters;
 using WholeSaler.Web.Models.ViewModels.ShoppingCartVM;
 using WholeSaler.Web.MongoIdentity;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Comprehensive;
 using wholesaler.web.helpers.producthelper;
+using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.BaseProduct;
 
 
 namespace WholeSaler.Web.Areas.Auth.Controllers
@@ -107,6 +106,7 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
         }
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
+        
         {
             var uri = $"{apiUri}/{id}";
             var response = await _httpClient.GetAsync(uri);
@@ -167,8 +167,8 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
                     }
                 }
             }
-            var uri = $"{apiUri}/edit";
             
+            var uri = $"{apiUri}/edit";     
             var json = JsonConvert.SerializeObject(productData);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             var result = await _httpClient.PutAsync(uri, content);
@@ -209,7 +209,7 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
             if (response.IsSuccessStatusCode)
             {
                 var jsonProduct = await response.Content.ReadAsStringAsync();
-                var productData = JsonConvert.DeserializeObject<ProductVM>(jsonProduct);
+                var productData = JsonConvert.DeserializeObject<ProductVm>(jsonProduct);
                 if (productData != null)
                 {
                     return View(productData);
@@ -332,6 +332,7 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
             
             var uri = $"{apiUri}/create";
             comprehensiveVM.Type = comprehensiveVM.Category.SubCategory.Name;
+            comprehensiveVM = ProductHelper.SetCreateProductType(comprehensiveVM);
             var json = JsonConvert.SerializeObject(comprehensiveVM);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             var result = await _httpClient.PostAsync(uri, content);

@@ -1,0 +1,57 @@
+﻿@model object
+@using System.Reflection
+@using WholeSaler.Web.Areas.Auth.Views.Shared.Components.DynamicForm
+
+@foreach (var property in Model.GetType().GetProperties())
+{
+    var propertiesToExclude = new[] { "Images" };
+
+    if (propertiesToExclude.Contains(property.Name))
+    {
+        continue;
+    }
+    var propertyName = property.Name;
+    var propertyValue = property.GetValue(Model, null);
+    var displayName = property.GetDisplayName();
+    var propertyPath = $"{Model.GetType().Name}.{propertyName}";
+
+   
+    var name = Model.GetType().Name + "." + propertyName;
+
+    if (property.GetCustomAttribute<HiddenInputAttribute>() != null)
+    {
+        <input type="hidden" name="@name" value="@propertyValue" />
+    }
+else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+    {
+        var boolValue = propertyValue != null && (bool)propertyValue;
+        <div class="form-group col-md-2">
+            <label for="@propertyPath">@displayName</label>
+            <select name="@propertyPath" class="form-control form-control-sm">
+                <option value="@boolValue">@(boolValue==true?"Yes":"No")</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select>
+        </div>
+    }
+    else
+    {
+        if (property.PropertyType == typeof(int) || property.PropertyType == typeof(int?))
+        {
+            <div class="form-group">
+                <label for="@name">@displayName</label>
+                <input type="number" name="@name" class="form-control" value="@propertyValue" />
+                <span data-valmsg-for="@name" class="text-danger"></span>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                <label for="@name">@displayName</label>
+                <input type="text" name="@name" class="form-control" value="@propertyValue" />
+                <span data-valmsg-for="@name" class="text-danger"></span>
+            </div>
+        }
+     
+    }
+}

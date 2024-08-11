@@ -13,7 +13,6 @@ using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product;
 using WholeSaler.Web.Helpers.IdentyClaims;
 using WholeSaler.Web.Helpers.QueryHelper;
 using WholeSaler.Web.Models.ViewModels.Product;
-using WholeSaler.Web.Models.ViewModels.Product.Filters;
 using WholeSaler.Web.Models.ViewModels.ShoppingCartVM;
 using static System.Net.WebRequestMethods;
 using static System.Runtime.InteropServices.JavaScript.JSType;

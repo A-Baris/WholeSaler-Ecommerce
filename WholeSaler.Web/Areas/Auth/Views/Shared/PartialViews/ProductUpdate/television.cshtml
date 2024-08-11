@@ -1,0 +1,44 @@
+﻿@model WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.ProductEditVM
+
+
+@* @await Component.InvokeAsync("DynamicForm", Model.Television) *@
+
+<div class="form-group">
+    <label asp-for="Laptop.Name"></label>
+    <input asp-for="Laptop.Name" class="form-control" value="@Model.Laptop.Name" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+
+</div>
+
+<div class="form-group">
+    <label asp-for="Laptop.Brand"></label>
+    <input asp-for="Laptop.Brand" class="form-control" value="@Model.Laptop.Brand" />
+    <span asp-validation-for="Laptop.Brand" class="text-danger"></span>
+
+</div>
+<div class="form-group">
+    <label asp-for="Laptop.Color"></label>
+    <input asp-for="Laptop.Color" class="form-control" value="@Model.Laptop.Color" />
+    <span asp-validation-for="Laptop.Color" class="text-danger"></span>
+
+</div>
+
+<div class="form-group">
+    <label asp-for="Laptop.Stock"></label>
+    <input asp-for="Laptop.Stock" class="form-control" value="@Model.Laptop.Stock" />
+    <span asp-validation-for="Laptop.Stock" class="text-danger"></span>
+
+</div>
+<div class="form-group">
+    <label asp-for="Laptop.UnitPrice"></label>
+    <input asp-for="Laptop.UnitPrice" class="form-control" value="@Model.Laptop.UnitPrice" />
+    <span asp-validation-for="Laptop.UnitPrice" class="text-danger"></span>
+
+</div>
+
+<div class="form-group">
+    <label asp-for="Laptop.Description"></label>
+    <input asp-for="Laptop.Description" class="form-control" value="@Model.Laptop.Description" />
+    <span asp-validation-for="Laptop.Description" class="text-danger"></span>
+
+</div>

@@ -6,6 +6,7 @@ using WholeSaler.Web.Models.ViewModels.Product;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using WholeSaler.Web.Utility;
+using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.BaseProduct;
 
 namespace WholeSaler.Web.Controllers
 {
@@ -42,7 +43,7 @@ namespace WholeSaler.Web.Controllers
             if (response.IsSuccessStatusCode)
             {
                 var jsonProduct = await response.Content.ReadAsStringAsync();
-                var productData = JsonConvert.DeserializeObject<ProductVM>(jsonProduct);
+                var productData = JsonConvert.DeserializeObject<ProductVm>(jsonProduct);
                 if (productData != null) 
                 {
                  return View(productData);

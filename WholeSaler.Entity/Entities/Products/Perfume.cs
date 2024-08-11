@@ -9,8 +9,10 @@ namespace WholeSaler.Entity.Entities.Products
     public class Perfume:Product
     {
         public string? PerfumeType { get; set; }
-        public string? Smell { get; set; }
         public int? Volume { get; set; }
+        public string? Smell { get; set; }
+        public string? SmellType { get; set; }
+      
 
     }
 }

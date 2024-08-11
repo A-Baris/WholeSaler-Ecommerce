@@ -143,21 +143,22 @@ namespace WholeSaler.Business.ConcreteServices
 
                 var cacheEntity = await redisDb.HashGetAllAsync(entitykey);
 
-                var entityList = cacheEntity.Select(item => Newtonsoft.Json.JsonConvert.DeserializeObject<BaseProduct>(item.Value)).ToList();
+                //var entityList = cacheEntity.Select(item => Newtonsoft.Json.JsonConvert.DeserializeObject<BaseProduct>(item.Value)).ToList();
 
 
 
 
-                foreach (var document in entityList)
+                foreach (var document in cacheEntity)
                 {
                     if (document == null)
                     {
                         continue;
                     }
+                    var jsonString = document.Value.ToString();
+                    var jsonObject = Newtonsoft.Json.Linq.JObject.Parse(document.Value.ToString());
+                    string type = jsonObject["type"]?.ToString();
 
-                    string type = document.Category.SubCategory.Name;  // Assuming 'Type' is a property of 'BaseProduct' or its derived classes
-
-                    string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(document); // Convert document to JSON string
+ 
 
                     switch (type)
                     {
@@ -168,6 +169,10 @@ namespace WholeSaler.Business.ConcreteServices
                         case "Television":
                             var tv = Newtonsoft.Json.JsonConvert.DeserializeObject<Television>(jsonString);
                             products.Add(tv);
+                            break;
+                        case "Perfume":
+                            var perfume = Newtonsoft.Json.JsonConvert.DeserializeObject<Perfume>(jsonString);
+                            products.Add(perfume);
                             break;
                         default:
                             var product = Newtonsoft.Json.JsonConvert.DeserializeObject<Product>(jsonString);
@@ -183,7 +188,6 @@ namespace WholeSaler.Business.ConcreteServices
 
                 var collection = MongoDB();
                 var documents = await collection.Find(new BsonDocument()).ToListAsync();
-                //var products = new List<Product>();
 
                 // Deserialize each document based on the "_t" field
                 foreach (var document in documents)
@@ -198,9 +202,13 @@ namespace WholeSaler.Business.ConcreteServices
                             break;
                         case "Television":
                             var tv = BsonSerializer.Deserialize<Television>(document);
-
-                            products.Add(tv);
+                          products.Add(tv);
                             break;
+                        case "Perfume":
+                            var perfume = BsonSerializer.Deserialize<Perfume>(document);
+                            products.Add(perfume);
+                            break;
+                           
                         default:
                             products.Add(BsonSerializer.Deserialize<Product>(document));
                             break;
@@ -231,7 +239,8 @@ namespace WholeSaler.Business.ConcreteServices
             var typeMap = new Dictionary<string, Type>
           {
         { "Laptop", typeof(Laptop) },
-        { "Television", typeof(Television) }
+        { "Television", typeof(Television) },
+                { "Perfume", typeof(Perfume) },
      
            };
 
@@ -308,6 +317,9 @@ namespace WholeSaler.Business.ConcreteServices
                     return prd;
                 case "Laptop":
                     prd = BsonSerializer.Deserialize<Laptop>(entity);
+                    return prd;
+                case "Perfume":
+                    prd = BsonSerializer.Deserialize<Perfume>(entity);
                     return prd;
                 default:
                     break;

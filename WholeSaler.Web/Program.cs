@@ -12,7 +12,7 @@ using System.Net;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using WholeSaler.Web.CustomMiddleWares;
 using WholeSaler.Web.Hubs;
-using WholeSaler.Web.Models.ViewModels.Product.Services;
+using WholeSaler.Web.Helpers.ProductHelper;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -29,6 +29,7 @@ builder.Services.AddIdentity<AppUser, AppRole>()
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddControllersWithViews().AddFluentValidation(x => x.RegisterValidatorsFromAssemblyContaining<Program>());
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IProductFilterService,ProductFilterService>();
 
 builder.Services.AddTransient(typeof(IValidationService<>), typeof(ValidationService<>));
 

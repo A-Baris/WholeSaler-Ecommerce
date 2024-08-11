@@ -1,4 +1,5 @@
-﻿using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.UpdateVMs;
+﻿using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Consricted;
+using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.UpdateVMs;
 
 namespace WholeSaler.Web.Areas.Auth.Models.ViewModels.Product
 {
@@ -17,6 +18,8 @@ namespace WholeSaler.Web.Areas.Auth.Models.ViewModels.Product
         public string? Description { get; set; }
         public ProductCategoryVM? Category { get; set; }
         public ProductStoreVM? Store { get; set; }
-        public LaptopUpdateVm? Laptop { get; set; }
+        public Laptop? Laptop { get; set; }
+        public Consricted.Television? Television { get; set; }
+        public Consricted.Perfume? Perfume { get; set; }
     }
 }
