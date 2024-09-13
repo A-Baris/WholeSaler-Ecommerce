@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.BaseProduct;
 
@@ -20,14 +21,12 @@ namespace WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Consricted
         public string? VideoCardType { get; set; }
         [DisplayName("Video Card Ram")]
         public int? VideoCardRam { get; set; }
-        public bool? Hdmi { get; set; }
-        public bool? TouchingScreen { get; set; }
-        public bool? FingerPrintReeder { get; set; }
+    
         [DisplayName("Screen Type")]
         public string? ScreenType { get; set; }
         [DisplayName("Screen Resolution\n(ex; 1024 x 800)")]
         public string? ScreenResolution { get; set; }
-        public bool? OpticalDrive { get; set; }
+       
         [DisplayName("Device Weight")]
         public string? DeviceWeight { get; set; }
         [DisplayName("Screen Size / Inc")]
@@ -36,8 +35,13 @@ namespace WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Consricted
         public int? SsdCapacity { get; set; }
         [DisplayName("Harddisk Memory Capacity")]
         public int? HarddiskCapacity { get; set; }
-        public bool? CardReeder { get; set; }
+        [HiddenInput]
         [DisplayName("Laptop Type")]
         public string? LaptopType { get; set; }
+        public bool? Hdmi { get; set; }
+        public bool? TouchingScreen { get; set; }
+        public bool? FingerPrintReeder { get; set; }
+        public bool? OpticalDrive { get; set; }
+        public bool? CardReeder { get; set; }
     }
 }

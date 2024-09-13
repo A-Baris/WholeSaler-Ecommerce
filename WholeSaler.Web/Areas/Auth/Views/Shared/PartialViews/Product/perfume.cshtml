@@ -1,32 +1,60 @@
-﻿@model ProductComprehensiveVM
+﻿
+
+@model ProductComprehensiveVM
 
 @{
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+    var propertiesToExclude = new[] { "Images" };
+    var prd = new Perfume();
 
-
+    var storeId = ViewData["StoreId"];
+    var storeName = ViewData["StoreName"];
+    var categoryName = TempData["CategoryName"] as string;
+    var categoryId = TempData["CategoryId"] as string;
+    var subCategoryName = TempData["SubCategoryName"] as string;
+    var subCategoryId = TempData["SubCategoryId"] as string;
+   
 }
 
 
-<div class="form-group">
-    <label asp-for="Perfume.PerfumeType"></label>
-    <input asp-for="Perfume.PerfumeType" class="form-control" />
-    <span asp-validation-for="Perfume.PerfumeType" class="text-danger"></span>
 
-</div>
-<div class="form-group">
-    <label asp-for="Perfume.Smell"></label>
-    <input asp-for="Perfume.Smell" class="form-control" />
-    <span asp-validation-for="Perfume.Smell" class="text-danger"></span>
+<form asp-controller="product" asp-action="create" asp-area="auth" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-</div>
-<div class="form-group">
-    <label asp-for="Perfume.SmellType"></label>
-    <input asp-for="Perfume.SmellType" class="form-control" />
-    <span asp-validation-for="Perfume.SmellType" class="text-danger"></span>
 
-</div>
-<div class="form-group">
-    <label asp-for="Perfume.Volume"></label>
-    <input asp-for="Perfume.Volume" class="form-control" />
-    <span asp-validation-for="Perfume.Volume" class="text-danger"></span>
+    @if (Model != null)
+    {
+        <h6 style="color:red">*(Please check validation errors!)</h6>
+        @await Component.InvokeAsync("DynamicForm", Model.Perfume)
+    
+    }
+    else
+    {
+        @Html.GenerateFormFields(prd, propertiesToExclude)
+    }
+    <div class="form-group">
+        <label>Product Images</label>
+        <input type="file" class="form-control" name="productImages" multiple>
+        <span class="text-muted">You should use "ctrl" to choose more than one image.</span>
+    </div>
+    @if (Model != null)
+    {
+        <input type="text" id="categoryIdInput" asp-for="Category.CategoryId" value="@Model.Category.CategoryId" hidden>
+        <input type="text" id="categoryNameInput" asp-for="Category.CategoryName" value="@Model.Category.CategoryName" hidden>
+        <input type="text" id="subCategoryIdInput" asp-for="Category.SubCategory.Id" value="@Model.Category.SubCategory.Id" hidden>
+        <input type="text" id="subCategoryNameInput" asp-for="Category.SubCategory.Name" value="@Model.Category.SubCategory.Name" hidden>
+        <input type="text" asp-for="Store.StoreName" value="@Model.Store.StoreName" hidden>
+        <input type="text" asp-for="Store.StoreId" value="@Model.Store.StoreId" hidden>
+    }
+    <input type="text" id="categoryIdInput" asp-for="Category.CategoryId" value="@categoryId" hidden>
+    <input type="text" id="categoryNameInput" asp-for="Category.CategoryName" value="@categoryName" hidden>
+    <input type="text" id="subCategoryIdInput" asp-for="Category.SubCategory.Id" value="@subCategoryId" hidden>
+    <input type="text" id="subCategoryNameInput" asp-for="Category.SubCategory.Name" value="@subCategoryName" hidden>
+    <input type="text" asp-for="Store.StoreName" value="@storeName" hidden>
+    <input type="text" asp-for="Store.StoreId" value="@storeId" hidden>
+    <div class="text-center">
 
-</div>
+        <button type="submit" class="btn btn-primary" style="margin-top:10px">Create</button>
+    </div>
+</form>
+

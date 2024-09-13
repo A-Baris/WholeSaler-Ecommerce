@@ -15,13 +15,15 @@ namespace WholeSaler.Api.Controllers
     public class ShoppingCartController : BaseController
     {
         private readonly IShoppingCartServiceWithRedis _cartServiceWithRedis;
+        private readonly IProductServiceWithRedis _productServiceWithRedis;
         private readonly IMapper _mapper;
         private readonly ILogger<ShoppingCartController> _logger;
         private const string controllerName = "ShoppingCartController";
 
-        public ShoppingCartController(IShoppingCartServiceWithRedis cartServiceWithRedis,IMapper mapper,ILogger<ShoppingCartController> logger)
+        public ShoppingCartController(IShoppingCartServiceWithRedis cartServiceWithRedis,IProductServiceWithRedis productServiceWithRedis,IMapper mapper,ILogger<ShoppingCartController> logger)
         {
             _cartServiceWithRedis = cartServiceWithRedis;
+            _productServiceWithRedis = productServiceWithRedis;
             _mapper = mapper;
            _logger = logger;
         }
@@ -53,6 +55,11 @@ namespace WholeSaler.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ShoppingCart shoppingCart)
         {
+            foreach (var prd in shoppingCart.Products)
+            {
+                var product = await _productServiceWithRedis.GetProduct(prd.Id);
+                prd.UnitPrice = product.UnitPrice;
+            }
             try
             {
                 return await ValidateAndExecute(shoppingCart,
@@ -133,6 +140,11 @@ namespace WholeSaler.Api.Controllers
         [HttpPut("edit")]
         public async Task<IActionResult> Edit(ShoppingCart shoppingCart)
         {
+            foreach (var prd in shoppingCart.Products)
+            {
+                var product = await _productServiceWithRedis.GetProduct(prd.Id);
+                prd.UnitPrice = product.UnitPrice;
+            }
             try
             {
                 return await ValidateAndExecute(shoppingCart,

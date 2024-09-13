@@ -1,0 +1,108 @@
+﻿@using Newtonsoft.Json
+@model List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>
+
+@{
+    ViewData["Title"] = "Category";
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+}
+
+<div class="form-group">
+    <label>Kategori</label>
+    <select class="form-control" id="categorySelect">
+        <option>Kategori Seçiniz</option>
+    </select>
+</div>
+<div class="form-group">
+    <label>Alt Kategori</label>
+    <select class="form-control" id="subCategorySelect">
+        <option id="subCategoryOption">Alt Kategori Seçiniz</option>
+    </select>
+</div>
+
+<form asp-action="selectcategory" asp-controller="product" asp-area="auth" method="post">
+    <input type="text" id="categoryIdInput" name="categoryId" hidden>
+    <input type="text" id="categoryNameInput" name="categoryName" hidden>
+    <input type="text" id="subCategoryIdInput" name="subCategoryId" hidden>
+    <input type="text" id="subCategoryNameInput" name="subCategoryName" hidden>
+    <div class="text-center">
+
+        <button type="submit" class="btn btn-primary" style="margin-top:10px;width:30%">Next</button>
+    </div>
+</form>
+<script>
+    fetch('https://localhost:7185/api/category')
+        .then(response => response.json())
+        .then(data => {
+            const categorySelect = document.getElementById('categorySelect');
+            const subCategorySelect = document.getElementById('subCategorySelect');
+            const nameInput = document.getElementById('categoryNameInput');
+            const idInput = document.getElementById('categoryIdInput');
+            const subCategoryNameInput = document.getElementById('subCategoryNameInput');
+            const subCategoryIdInput = document.getElementById('subCategoryIdInput');
+
+            console.log(data);
+
+            // Populate categories
+            data.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
+
+            // Kategori seçildiğinde çalışacak olan fonksiyon
+            function categorySelected() {
+                const selectedOption = categorySelect.selectedOptions[0];
+
+                // // Seçilen kategorinin adını ve ID'sini alıp ilgili input alanlarına yerleştir
+                nameInput.value = selectedOption.textContent;
+                idInput.value = selectedOption.value;
+
+                // Seçilen kategoriye göre alt kategorileri doldur
+                const selectedCategory = data.find(category => category.id === selectedOption.value);
+
+                if (selectedCategory && selectedCategory.subCategories) {
+                    populateSubCategories(selectedCategory.subCategories);
+                } else {
+                    populateSubCategories([]);
+                }
+            }
+
+            // Alt kategorileri dolduran fonksiyon
+            function populateSubCategories(subCategories) {
+                // Alt kategori select elementini temizle
+                subCategorySelect.innerHTML = '';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Alt Kategori Seçiniz';
+                subCategorySelect.appendChild(defaultOption);
+
+                subCategories.forEach(subCategory => {
+                    const option = document.createElement('option');
+                    option.value = subCategory.id;
+                    option.textContent = subCategory.name;
+                    subCategorySelect.appendChild(option);
+                });
+            }
+
+            // Alt kategori seçildiğinde çalışacak olan fonksiyon
+            function subCategorySelected() {
+                const selectedOption = subCategorySelect.selectedOptions[0];
+
+                // // Seçilen alt kategorinin adını ve ID'sini alıp ilgili input alanlarına yerleştir
+                subCategoryNameInput.value = selectedOption ? selectedOption.textContent : '';
+                subCategoryIdInput.value = selectedOption ? selectedOption.value : '';
+            }
+
+            // Select alanındaki seçim değiştiğinde categorySelected fonksiyonunu çağır
+            categorySelect.addEventListener('change', categorySelected);
+
+            // Subcategory select alanındaki seçim değiştiğinde subCategorySelected fonksiyonunu çağır
+            subCategorySelect.addEventListener('change', subCategorySelected);
+        })
+        .catch(error => {
+            console.error('Kategorileri alma işlemi başarısız oldu:', error);
+        });
+
+</script>

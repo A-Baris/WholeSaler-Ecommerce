@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Comprehensive;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Consricted;
-using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.UpdateVMs;
 using WholeSaler.Web.Helpers.ImageHelper;
 using WholeSaler.Web.Helpers.PropertyCoppier;
 
@@ -28,12 +27,12 @@ namespace wholesaler.web.helpers.producthelper
             }
             if (productType == "Television")
             {
-                product.Television = jObject.ToObject<WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Consricted.Television>();
+                product.Television = jObject.ToObject<Television>();
                 
             }
             if (productType == "Perfume")
             {
-                product.Perfume = jObject.ToObject<WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Consricted.Perfume>();
+                product.Perfume = jObject.ToObject<Perfume>();
 
             }
 
@@ -41,13 +40,13 @@ namespace wholesaler.web.helpers.producthelper
             return product;
 
         }
-        public static ProductEditPostVM ChangeTypeForUpdatePost(ProductEditPostVM data, ProductImageUpdateVm imageUpdateVm)
+        public static ProductEditVM ChangeTypeForUpdatePost(ProductEditVM data, ProductImageUpdateVm imageUpdateVm)
         {
 
 
             if (data.Laptop != null)
             {
-                if(data.Laptop.Images == null)
+                if(data.Laptop.Images != null)
                 {
                     data.Laptop.Images = new List<ProductImage>();
                     return data;
@@ -63,7 +62,7 @@ namespace wholesaler.web.helpers.producthelper
                 data.Television.Images = imageUpdateVm.Images;
                 return data;
             }
-            if (data.Perfume != null && data.Perfume.Images!=null)
+            if (data.Perfume != null )
             {
                 data.Perfume.Images = new List<ProductImage>();
                 data.Perfume.Images = imageUpdateVm.Images;
@@ -82,6 +81,11 @@ namespace wholesaler.web.helpers.producthelper
             if (comprehensiveVM.Laptop != null)
             {
                 CopyProperty.CopyProperties(comprehensiveVM, comprehensiveVM.Laptop);
+                return comprehensiveVM;
+            }
+            if (comprehensiveVM.Television != null)
+            {
+                CopyProperty.CopyProperties(comprehensiveVM, comprehensiveVM.Television);
                 return comprehensiveVM;
             }
             return null;

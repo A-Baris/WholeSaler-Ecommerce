@@ -5,10 +5,10 @@ namespace WholeSaler.Web.Controllers
     public class AccountController : Controller
     {
         [HttpGet]
-        public IActionResult AccessDenied()
+        public IActionResult Login(string returnUrl)
         {
             
-            return RedirectToAction("Login", "User");
+            return RedirectToAction("Login", "User", new {returnUrl=returnUrl});
         }
     }
 }

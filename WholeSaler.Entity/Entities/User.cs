@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WholeSaler.Entity.Entities.Enums;
 
 namespace WholeSaler.Entity.Entities
 {
@@ -13,9 +14,9 @@ namespace WholeSaler.Entity.Entities
         public string Email { get; set; }
         public string? Role { get; set; }
         public string? Phone { get; set; }
-        public Adress? Adress { get; set; }
+        public List<Adress>? Adress { get; set; }
 
         public string? StoreId { get; set; }
-   
+
     }
 }

@@ -51,7 +51,11 @@ namespace WholeSaler.Web.Areas.Admin.Controllers
         {
             
             var approveStoreUri = $"https://localhost:7185/api/store/ApproveApplication/{storeId}";
-            SetAuthHeader.SetAuthorizationHeader(_httpClient, Request);
+            if (!SetAuthHeader.SetAuthorizationHeader(Request,_httpClient))
+            {
+                TempData["errorMessage"] = "Authorization failed";
+                return RedirectToAction("StoreApplications", "store", new { area = "admin" });
+            }
             var result = await _httpClient.GetAsync(approveStoreUri);
             if (result.IsSuccessStatusCode)
             {

@@ -7,6 +7,7 @@ using WholeSaler.Web.Areas.Admin.Models.ViewModels.Store;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Category;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Store;
 using WholeSaler.Web.FluentValidation.Configs;
+using WholeSaler.Web.Helpers.HttpClientApiRequests;
 using WholeSaler.Web.Models.ViewModels.ShoppingCartVM;
 using WholeSaler.Web.MongoIdentity;
 
@@ -14,51 +15,49 @@ namespace WholeSaler.Web.Controllers
 {
     public class StoreController : Controller
     {
-        private readonly IHttpClientFactory _httpClientFactory;
         private readonly UserManager<AppUser> _userManager;
         private readonly IValidationService<StoreCreateVM> _storeCreateValidator;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpApiRequest _httpApiRequest;
+        private readonly string storeApiUri = "https://localhost:7185/api/store";
 
-        public StoreController(IHttpClientFactory httpClientFactory,UserManager<AppUser> userManager,IValidationService<StoreCreateVM> storeCreateValidator)
+        public StoreController(UserManager<AppUser> userManager, IValidationService<StoreCreateVM> storeCreateValidator,IHttpApiRequest httpApiRequest)
         {
-           _httpClientFactory = httpClientFactory;
             _userManager = userManager;
             _storeCreateValidator = storeCreateValidator;
-            _httpClient = httpClientFactory.CreateClient();
+            _httpApiRequest = httpApiRequest;
         }
-        public async Task<IActionResult> Index(string storeId,string productName,string categoryName)
+        //[Route("Store/{storeId}/{storeName}")]
+        public async Task<IActionResult> Index(string storeId, string productName, string categoryName)
         {
-            ViewData["StoreId"]=storeId;
+            ViewData["StoreId"] = storeId;
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             ViewData["uId"] = userId;
             ViewData["visitorId"] = Request.Cookies["visitor"];
             var categoryUri = "https://localhost:7185/api/category";
-            var responseCategory = await _httpClient.GetAsync(categoryUri);
+            var responseCategory = await _httpApiRequest.GetAsync(categoryUri);
 
-            var storeUri = $"https://localhost:7185/api/store/{storeId}";
-            var storeResponse = await _httpClient.GetAsync(storeUri);
-            if (storeResponse.IsSuccessStatusCode) 
+            var storeUri = storeApiUri+$"/{storeId}";
+            var storeResponse = await _httpApiRequest.GetAsync(storeUri);
+            if (storeResponse.IsSuccessStatusCode)
             {
-                var storeJson = await storeResponse.Content.ReadAsStringAsync();
-                var storeData = JsonConvert.DeserializeObject<StoreVM>(storeJson);
+             
+                var storeData = await _httpApiRequest.DeserializeJsonToModelForSingle<StoreVM>(storeResponse);
                 ViewBag.StoreInfo = storeData;
             }
 
 
             var apiUri = "https://localhost:7185/api/product";
-            var response = await _httpClient.GetAsync(apiUri);
-            if (response.IsSuccessStatusCode)
+            var productResponse = await _httpApiRequest.GetAsync(apiUri);
+            if (productResponse.IsSuccessStatusCode)
             {
 
-
-                var jsonString = await response.Content.ReadAsStringAsync();
-                var productData = JsonConvert.DeserializeObject<List<ProductForCartVM>>(jsonString);
+                var productData = await _httpApiRequest.DeserializeJsonToModelForList<ProductForCartVM>(productResponse);
                 var data = productData.Where(x => x.Store.StoreId == storeId).ToList();
-               
+
                 if (responseCategory.IsSuccessStatusCode)
                 {
                     var jsonCategory = await responseCategory.Content.ReadAsStringAsync();
-                    var categoryData = JsonConvert.DeserializeObject<List<CategoryVM>>(jsonCategory);
+                    var categoryData = await _httpApiRequest.DeserializeJsonToModelForList<CategoryVM>(responseCategory);
                     ViewBag.Categories = categoryData;
                     if (categoryName != null)
                     {
@@ -77,7 +76,7 @@ namespace WholeSaler.Web.Controllers
                     if (data.Count > 0) { return View(data); }
                     else
                     {
-                        TempData["productNameMessage"] = $"{productName} is not found";
+                        TempData["ErrorMessage"] = $"{productName} is not found";
                         return RedirectToAction("index");
                     }
 
@@ -116,27 +115,23 @@ namespace WholeSaler.Web.Controllers
 
             createVM.UserId = userId;
 
-            var uri = $"https://localhost:7185/api/store";
-            var json = JsonConvert.SerializeObject(createVM);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(uri, content);
-            if (response.IsSuccessStatusCode) 
+            var response = await _httpApiRequest.PostAsync(storeApiUri, createVM);
+            if (response.IsSuccessStatusCode)
             {
-                var jsonStore = await response.Content.ReadAsStringAsync();
-                var storeData = JsonConvert.DeserializeObject<StoreVM>(jsonStore);
+                var storeData = await _httpApiRequest.DeserializeJsonToModelForSingle<StoreVM>(response);
                 user.StoreId = storeData.Id;
-               var updatedUser= _userManager.UpdateAsync(user);
+                var updatedUser = _userManager.UpdateAsync(user);
 
                 return RedirectToAction("ApplicationDetails", "store");
 
             }
             //hata mesajı
-           return RedirectToAction("create","store");
+            return RedirectToAction("create", "store");
         }
         [HttpGet]
-        public  IActionResult ApplicationDetails()
+        public IActionResult ApplicationDetails()
         {
-          
+
             return View();
         }
     }

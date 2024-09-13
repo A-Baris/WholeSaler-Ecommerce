@@ -2,7 +2,7 @@
 
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height:100%">
 @{
     string name = "";
     string userId = "";
@@ -32,6 +32,7 @@
             width: 50px;
             height: auto;
         }
+
     </style>
 </head>
 <body>
@@ -51,9 +52,7 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                            </li>
+                         
 
 
                         </ul>
@@ -118,15 +117,15 @@
                         </div>
                     </div>
                 </div>
-               
+
             </nav>
-        
+
         </div>
     </header>
 
-    <main role="main" class="pb-3" style="background-color:#fbfdfb">
-       
-        
+    <main role="main" class="flex-grow-1 pb-3" style="background-color:#fbfdfb;min-height: 100vh">
+
+
         <div style="margin-left:5px;margin-right:5px;margin-top:5px">
             <div id="messageDiv" class="message-container">
                 @if (!string.IsNullOrEmpty(successMessage))
@@ -159,18 +158,27 @@
     </main>
 
 
+    <div >
 
+        <footer class="mt-auto" style="background-color: #ff7400;">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright © Your Website 2023</div>
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        ·
+                        <a href="#">Terms &amp; Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
 
-    <footer class="border-top footer text-muted" style="background-color:#ff7400;">
-        <div class="container">
-            &copy; 2024 - WholeSaler.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/SignalR/signalr.min.js"></script>
-   
+
     <script>
 
         function updateCartCount() {

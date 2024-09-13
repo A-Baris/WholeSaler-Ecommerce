@@ -1,0 +1,61 @@
+﻿@model WholeSaler.Web.Models.ViewModels.OrderVM.OrderVM
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+}
+
+<div>
+    <a asp-action="index" asp-controller="order" asp-area="auth">Back to Orders</a>
+</div>
+<div class="row">
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total Price</th>
+                <th>Order Status</th>
+                <th><a asp-action="PrintOrderDetail" asp-controller="order" asp-area="auth" asp-route-orderId="@Model.Id" class="btn btn-warning">Print Order</a></th>
+
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prd in Model.Products)
+            {
+
+
+
+
+
+                <tr>
+
+                    <td>@prd.Name</td>
+                    <td>@prd.Quantity</td>
+                    <td>@prd.UnitPrice TL</td>
+                    <td>@(prd.UnitPrice * prd.Quantity) TL</td>
+                    <td>@prd.OrderStatus</td>
+                    <td>
+                        <a asp-action="PreparingStatus" asp-controller="order" asp-area="auth" asp-route-orderId="@Model.Id" asp-route-productId="@prd.Id" class="btn btn-success">Preparing</a>
+                        <a asp-action="ShippedStatus" asp-controller="order" asp-area="auth" asp-route-orderId="@Model.Id" asp-route-productId="@prd.Id" class="btn btn-secondary">Shipped</a>
+                        
+                    </td>
+                   
+
+
+                </tr>
+
+
+
+
+            }
+        </tbody>
+    </table>
+
+    <div>
+        <div style="float:left"><h6>Total Order Amount : <h6 style="color:green">@Model.TotalOrderAmount TL</h6></h6></div>
+    </div>
+</div>
+

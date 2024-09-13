@@ -1,5 +1,27 @@
-﻿@model WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.ProductEditVM
+﻿@model ProductEditVM
+@{
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+    var errors = ViewBag.Errors;
+}
 
-<h3>Television Specific Fields</h3>
-<!-- Add any other specific fields for Television here -->
-@await Component.InvokeAsync("DynamicForm", Model.Perfume)
+@if (errors != null)
+{
+    <h6 style="color:red">*(Please check validation errors!)*</h6>
+}
+
+
+<form asp-controller="product" asp-action="edit" asp-area="auth" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label>Product Images</label>
+        <input type="file" class="form-control" name="productImages" multiple>
+        <span class="text-muted">You should use "ctrl" to choose more than one image.</span>
+    </div>
+    <input name="Type" value="@Model.Type" hidden />
+    @await Component.InvokeAsync("DynamicForm", Model.Perfume)
+
+    <div class="text-center">
+
+        <button type="submit" class="btn btn-primary" style="margin-top:10px">Edit</button>
+    </div>
+
+</form>

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WholeSaler.Business.AbstractRepo;
 using WholeSaler.Entity.Entities;
+using WholeSaler.Entity.Entities.MongoIdentity;
 
 namespace WholeSaler.Business.AbstractServices
 {

@@ -14,6 +14,7 @@
 <link href="~/css/mystoreCard.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
 <style>
     .category {
         display: inline-block;
@@ -55,82 +56,83 @@
     .carousel-control-next {
         z-index: 1001; /* Ensure carousel controls are above the subcategory container */
     }
+
 </style>
 
 
-<div style="justify-content:center;height:90%;width:90%;margin-left:5%;margin-righ:5%;">
-    @if (!string.IsNullOrEmpty(cartMessage))
-    {
+@if (!string.IsNullOrEmpty(cartMessage))
+{
 
-        <div class="row justify-content-center">
-            <div id="messageDiv" class="col-md-6 alert alert-success">
-                <div class="d-flex justify-content-center align-items-center">
-                    <p>@cartMessage</p>
-                </div>
+    <div class="row justify-content-center">
+        <div id="messageDiv" class="col-md-6 alert alert-success">
+            <div class="d-flex justify-content-center align-items-center">
+                <p>@cartMessage</p>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+<div id="messageContainer" class="message-container">
+    @if (!string.IsNullOrEmpty(productNameMessage))
+    {
+        <div class="alert alert-danger">
+            <div class="d-flex justify-content-center align-items-center">
+                <h6>@productNameMessage</h6>
+
             </div>
         </div>
 
     }
+</div>
+<div id="messageContainer" class="message-container">
+    @if (!string.IsNullOrEmpty(noCartMessage))
+    {
+        <div class="alert alert-danger">
+            <div class="d-flex justify-content-center align-items-center">
+                <h6>@noCartMessage</h6>
 
-
-    <div id="messageContainer" class="message-container">
-        @if (!string.IsNullOrEmpty(productNameMessage))
-        {
-            <div class="alert alert-danger">
-                <div class="d-flex justify-content-center align-items-center">
-                    <h6>@productNameMessage</h6>
-
-                </div>
             </div>
+        </div>
 
-        }
-    </div>
-    <div id="messageContainer" class="message-container">
-        @if (!string.IsNullOrEmpty(noCartMessage))
-        {
-            <div class="alert alert-danger">
-                <div class="d-flex justify-content-center align-items-center">
-                    <h6>@noCartMessage</h6>
+    }
+</div>
 
-                </div>
+
+<div class="text-center" id="categoryDiv">
+    @foreach (var category in categories as List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>)
+    {
+
+        <div class="category" style="color:#ff7400;display: inline-block; position: relative;">
+            <span><a style="text-decoration:none" asp-controller="home" asp-action="category" asp-route-categoryName="@category.Name">@category.Name</a></span>
+            <div class="subcategory-container">
+                @foreach (var subCategory in category.SubCategories)
+                {
+                    <div class="subcategory">
+                        <a style="text-decoration:none" asp-controller="home" asp-action="category" asp-route-categoryName="@category.Name" asp-route-subCategoryName="@subCategory.Name"><span>@subCategory.Name</span></a>
+                    </div>
+                }
             </div>
-
-        }
-    </div>
-
-
-    <div class="text-center" id="categoryDiv">
-        @foreach (var category in categories as List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>)
-        {
-
-            <div class="category" style="color:#ff7400;display: inline-block; position: relative;">
-                <span><a style="text-decoration:none" asp-controller="home" asp-action="category" asp-route-categoryName="@category.Name">@category.Name</a></span>
-                <div class="subcategory-container">
-                    @foreach (var subCategory in category.SubCategories)
-                    {
-                        <div class="subcategory">
-                            <a style="text-decoration:none" asp-controller="home" asp-action="category" asp-route-categoryName="@category.Name" asp-route-subCategoryName="@subCategory.Name"><span>@subCategory.Name</span></a>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
-    </div>
+        </div>
+    }
+</div>
 
 
-    <div class="col-md-9" id="productDiv">
-
-        <div class="row">
+<div class="d-flex justify-content-center" style="height:auto;margin-top:10px">
+    <div id="productDiv" class="col-md-8" style="margin-top: 0; padding-top: 0;">
+     
+      <div class="row">
             @foreach (var item in Model)
             {
-                <div class="col-md-2" style="height:300px;width:250px">
+                <div class="col-md-2" style="margin-top:5px;width:162px">
                     <form asp-action="addtocart" asp-controller="shoppingcart" method="post">
                         <div class="card">
                             <div class="card-img">
 
                                 @if (item.Images == null || !item.Images.Any())
                                 {
-                                    <img src="~/images/exampleimage.jpg" alt="Denim Jeans" style="width:100%;height:100px">
+                                    <img src="~/images/exampleimage.jpg" alt="Denim Jeans" style="width:100%;height:150px">
                                 }
                                 else
                                 {
@@ -141,7 +143,7 @@
                                             @for (var i = 0; i < item.Images.Count(); i++)
                                             {
                                                 <div class="carousel-item @(item.Images[i] == item.Images.First()? "active" : "")">
-                                                    <img src="~/images/products/@item.Images[i].FileName" class="d-block w-100" alt="@item.Images[i].FileName" style="width:100%;height:100px">
+                                                    <img src="~/images/products/@item.Images[i].FileName" class="d-block w-100" alt="@item.Images[i].FileName" style="width:100%;height:150px">
                                                 </div>
                                                 <input type="hidden" name="Images.Index" value="@i" />
                                                 <input type="hidden" name="Images[@i].FileName" value="@item.Images[i].FileName" />
@@ -171,15 +173,9 @@
                             }
                             <input name="UserId" value="@userId" hidden />
                             <input name="Id" value="@item.Id" hidden />
-                            <div>
-                                <a href="/store/index?storeId=@item.Store.StoreId" style="text-decoration:none">
-                                    <span style="font-size:small;color:black;">
-                                        @(item.Store?.StoreName ?? "Unknown")
-                                    </span>
-                                </a>
-                            </div>
+
                             <div class="card-body">
-                                <div style="height:75px">
+                                <div style="height:35px;text-align:center">
                                     <a href="/product/details?productId=@item.Id" style="text-decoration:none;color:black;">
                                         <input name="Name" value="@item.Name" hidden />
                                         <span>@item.Name</span>
@@ -188,7 +184,7 @@
 
 
                                 </div>
-                                <div>
+                                <div style="height:35px;text-align: center;width:100%;font-size:16px;">
                                     <span style="color:green;"><em>@string.Format("{0:F2}", item.UnitPrice) TL</em></span>
                                 </div>
                                 <input type="type" name="quantity" value="1" hidden />
@@ -209,16 +205,18 @@
 
 
                             </div>
-                            <button type="submit" class="addToCartButton">Add to Cart</button>
+                            <div class="card-button">
+                                <button type="submit" class="addToCartButton btn btn-primary" style="width:100%;font-size:8px;">Add To Cart</button>
+                            </div>
 
                         </div>
                     </form>
                 </div>
             }
-        </div>
+        </div> 
     </div>
-
 </div>
+
 
 
 <script>

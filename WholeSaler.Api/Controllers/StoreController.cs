@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WholeSaler.Api.Controllers.Base;
 using WholeSaler.Api.DTOs.Store;
 using WholeSaler.Business.AbstractServices;
 using WholeSaler.Business.ConcreteServices;
 using WholeSaler.Entity.Entities;
+using WholeSaler.Entity.Entities.MongoIdentity;
 
 namespace WholeSaler.Api.Controllers
 {
@@ -15,13 +17,17 @@ namespace WholeSaler.Api.Controllers
     public class StoreController : BaseController
     {
         private readonly IStoreServiceWithRedis _storeService;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<AppRole> _roleManager;
         private readonly ILogger<StoreController> _logger;
         private readonly IMapper _mapper;
         private const string controllerName = "StoreController";
 
-        public StoreController(IStoreServiceWithRedis storeService,ILogger<StoreController> logger,IMapper mapper)
+        public StoreController(IStoreServiceWithRedis storeService,UserManager<AppUser> userManager,RoleManager<AppRole> roleManager,ILogger<StoreController> logger,IMapper mapper)
         {
             _storeService = storeService;
+            _userManager = userManager;
+            _roleManager = roleManager;
             _logger = logger;
            _mapper = mapper;
         }
@@ -159,6 +165,12 @@ namespace WholeSaler.Api.Controllers
                     async (id) => await _storeService.GetById(id),
                     async result =>
                     {
+                        var user = await _userManager.FindByIdAsync(result.UserId);
+                        user.StoreId = result.Id;
+                        var roles =  _roleManager.Roles.ToList();
+                        var authRole = roles.Where(x => x.Name == "storeManager").FirstOrDefault();
+                        user.AddRole(authRole.Id);
+                        await _userManager.UpdateAsync(user);
                         result.AdminConfirmation=Entity.Entities.Enums.AdminConfirmation.Accepted;
                         var updatedStore = await _storeService.Update(result.Id, result);
                         var storeDto=_mapper.Map<StoreDto>(updatedStore);

@@ -158,14 +158,14 @@
             <div class="row">
                 @foreach (var item in Model)
                 {
-                    <div class="col-md-2" style="height:300px;width:250px">
+                    <div class="col-md-2" style="margin-top:5px;width:162px">
                         <form id="addToCartForm" asp-action="addtocart" asp-controller="shoppingcart" method="post">
                             <div class="card">
                                 <div class="card-img">
 
                                     @if (item.Images == null || !item.Images.Any())
                                     {
-                                        <img src="~/images/exampleimage.jpg" alt="Denim Jeans" style="width:100%;height:100px">
+                                        <img src="~/images/exampleimage.jpg" alt="Denim Jeans" style="width:100%;height:150px">
                                     }
                                     else
                                     {
@@ -176,7 +176,7 @@
                                                 @for (var i = 0; i < item.Images.Count(); i++)
                                                 {
                                                     <div class="carousel-item @(item.Images[i] == item.Images.First()? "active" : "")">
-                                                        <img src="~/images/products/@item.Images[i].FileName" class="d-block w-100" alt="@item.Images[i].FileName" style="width:100%;height:100px">
+                                                        <img src="~/images/products/@item.Images[i].FileName" class="d-block w-100" alt="@item.Images[i].FileName" style="width:100%;height:150px">
                                                     </div>
                                                     <input type="hidden" name="Images.Index" value="@i" />
                                                     <input type="hidden" name="Images[@i].FileName" value="@item.Images[i].FileName" />
@@ -206,15 +206,9 @@
                                 }
                                 <input name="UserId" value="@userId" hidden />
                                 <input name="Id" value="@item.Id" hidden />
-                                <div>
-                                    <a href="/store/index?storeId=@item.Store.StoreId" style="text-decoration:none">
-                                        <span style="font-size:small;color:black;">
-                                            @(item.Store?.StoreName ?? "Unknown")
-                                        </span>
-                                    </a>
-                                </div>
+                             
                                 <div class="card-body">
-                                    <div style="height:75px">
+                                    <div style="height:35px;text-align:center">
                                         <a href="/product/details?productId=@item.Id" style="text-decoration:none;color:black;">
                                             <input name="Name" value="@item.Name" hidden />
                                             <span>@item.Name</span>
@@ -223,7 +217,7 @@
 
 
                                     </div>
-                                    <div>
+                                    <div style="height:35px;text-align: center;width:100%;font-size:16px;">
                                         <span style="color:green;"><em>@string.Format("{0:F2}", item.UnitPrice) TL</em></span>
                                     </div>
                                     <input type="type" name="quantity" value="1" hidden />
@@ -241,7 +235,9 @@
                                    
 
                                 </div>
-                                <button type="submit" class="addToCartButton">Add to Cart</button>
+                                <div class="card-button">
+                                    <button type="submit" class="addToCartButton btn btn-primary" style="width:100%;font-size:8px;">Add To Cart</button>
+                                </div>
 
                             </div>
                         </form>

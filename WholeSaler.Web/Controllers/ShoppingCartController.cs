@@ -9,7 +9,9 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using WholeSaler.Web.Areas.Auth.Models.ViewModels.Category;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product;
+using WholeSaler.Web.Helpers.HttpClientApiRequests;
 using WholeSaler.Web.Helpers.IdentyClaims;
 using WholeSaler.Web.Helpers.QueryHelper;
 using WholeSaler.Web.Models.ViewModels.Product;
@@ -21,13 +23,15 @@ namespace WholeSaler.Web.Controllers
 {
     public class ShoppingCartController : Controller
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly HttpClient _httpClient;
 
-        public ShoppingCartController(IHttpClientFactory httpClientFactory)
+        private readonly IHttpApiRequest _httpApiRequest;
+        private readonly string cartApiUri = "https://localhost:7185/api/shoppingcart";
+
+        public ShoppingCartController(IHttpApiRequest httpApiRequest)
         {
-            _httpClientFactory = httpClientFactory;
-            _httpClient = _httpClientFactory.CreateClient();
+          
+           _httpApiRequest = httpApiRequest;
+   
 
         }
         public async Task<IActionResult> Index()
@@ -36,12 +40,10 @@ namespace WholeSaler.Web.Controllers
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
 
-            var checkCartUri = $"https://localhost:7185/api/shoppingcart/getcart/{userId}";
-            var result = await _httpClient.GetAsync(checkCartUri);
-            if (result.IsSuccessStatusCode)
+            var shoppingCart = await CheckCart(userId);
+            if (shoppingCart!=null)
             {
-                var jsonString = await result.Content.ReadAsStringAsync();
-                var shoppingCart = JsonConvert.DeserializeObject<ShoppingCartUpdateVM>(jsonString);
+               
                 ViewData["ShoppingCartId"] = shoppingCart.Id;
                 ViewData["Uid"] = shoppingCart.UserId;
                 List<ProductForCartVM> productsIncart = new();
@@ -61,16 +63,14 @@ namespace WholeSaler.Web.Controllers
                 {
 
 
-                    var checkVisitorCartUri = $"https://localhost:7185/api/shoppingcart/getcart/{visitorId}";
-                    var visitorCartResponse = await _httpClient.GetAsync(checkVisitorCartUri);
-                    if (visitorCartResponse.IsSuccessStatusCode)
+                    var visitorShoppingCart = await CheckCart(visitorId);
+                    if (visitorShoppingCart!=null)
                     {
-                        var jsonString = await visitorCartResponse.Content.ReadAsStringAsync();
-                        var shoppingCart = JsonConvert.DeserializeObject<ShoppingCartUpdateVM>(jsonString);
-                        ViewData["ShoppingCartId"] = shoppingCart.Id;
-                        ViewData["Uid"] = shoppingCart.UserId;
+                        
+                        ViewData["ShoppingCartId"] = visitorShoppingCart.Id;
+                        ViewData["Uid"] = visitorShoppingCart.UserId;
                         List<ProductForCartVM> productsIncart = new();
-                        foreach (var prd in shoppingCart.Products)
+                        foreach (var prd in visitorShoppingCart.Products)
                         {
                             productsIncart.Add(prd);
                         }
@@ -82,7 +82,7 @@ namespace WholeSaler.Web.Controllers
                     Console.WriteLine(ex.Message);
                 }
             }
-            TempData["NoCartMessage"] = "Sepetiniz Boş";
+            TempData["ErrorMessage"] = "Sepetiniz Boş";
             return RedirectToAction("Index", "Home");
         }
         [HttpPost]
@@ -102,60 +102,51 @@ namespace WholeSaler.Web.Controllers
                 Response.Cookies.Append("visitor", visitorId, cookieOptions);
                 cartCreateVM.UserId = visitorId;
             }
-            var checkCartUri = $"https://localhost:7185/api/shoppingcart/getcart/{cartCreateVM.UserId}";
-            var result = await _httpClient.GetAsync(checkCartUri);
-            if (!result.IsSuccessStatusCode)
+            var shoppingCart = await CheckCart(cartCreateVM.UserId);
+            if (shoppingCart==null)
             {
                 var shoppingCartCreateVM = new ShoppingCartCreateVM
                 {
                     UserId = cartCreateVM.UserId,
                     Products = new List<ProductForCartVM> { productVM }
                 };
-                var cartCreateUri = "https://localhost:7185/api/shoppingcart";
-                var json = JsonConvert.SerializeObject(shoppingCartCreateVM);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                var resultCart = await _httpClient.PostAsync(cartCreateUri, content);
+                var cartCreateUri = cartApiUri;
+                var resultCart = await _httpApiRequest.PostAsync(cartCreateUri, shoppingCartCreateVM);
                 TempData["CartMessage"] = $"{productVM.Name} is added to the cart";
 
                
             }
             else
             {
-                var jsonString = await result.Content.ReadAsStringAsync();
-                var data = JsonConvert.DeserializeObject<ShoppingCartUpdateVM>(jsonString);
-                var existingProduct = data.Products.Find(x => x.Id == productVM.Id);
+                
+                var existingProduct = shoppingCart.Products.Find(x => x.Id == productVM.Id);
                 if (existingProduct != null)
                 {
                     existingProduct.Quantity++;
                 }
                 else
                 {
-                    data.Products.Add(productVM);
+                    shoppingCart.Products.Add(productVM);
                 }
 
-                var cartUpdateUri = "https://localhost:7185/api/shoppingcart/edit";
-
-                var jsonUpdate = JsonConvert.SerializeObject(data);
-                var contentUpdate = new StringContent(jsonUpdate, System.Text.Encoding.UTF8, "application/json");
-                var resultUpdateCart = await _httpClient.PutAsync(cartUpdateUri, contentUpdate);
+                var cartUpdateUri = cartApiUri + "/edit";
+                var resultUpdateCart = await _httpApiRequest.PutAsync(cartUpdateUri, shoppingCart);
                 TempData["CartMessage"] = $"{productVM.Name} is added to the cart";
                 return returnUrl != null ? Redirect(returnUrl) : RedirectToAction("Index", "Home");
 
 
 
             }
-          
-            return RedirectToAction("Index", "Home");
+
+            return returnUrl != null ? Redirect(returnUrl) : RedirectToAction("Index", "Home");
 
 
         }
         [HttpPost]
         public async Task<IActionResult> Edit(ShoppingCartUpdateVM cartUpdateVM)
         {
-            var apiUri = "https://localhost:7185/api/shoppingcart/editincart";
-            var jsonUpdate = JsonConvert.SerializeObject(cartUpdateVM);
-            var contentUpdate = new StringContent(jsonUpdate, System.Text.Encoding.UTF8, "application/json");
-            var resultUpdateCart = await _httpClient.PutAsync(apiUri, contentUpdate);
+            var apiUri = cartApiUri + "/editincart";
+            var resultUpdateCart = await _httpApiRequest.PutAsync(apiUri, cartUpdateVM);
             if (resultUpdateCart.IsSuccessStatusCode)
             {
 
@@ -165,26 +156,23 @@ namespace WholeSaler.Web.Controllers
 
 
         }
-        [HttpGet]
-        public async Task<IActionResult> TestEdit(string Id)
-        {
-            var apiUri = "https://localhost:7185/api/shoppingcart/editincart";
-            var jsonUpdate = JsonConvert.SerializeObject(Id);
-            var contentUpdate = new StringContent(jsonUpdate, System.Text.Encoding.UTF8, "application/json");
-            var resultUpdateCart = await _httpClient.PutAsync(apiUri, contentUpdate);
-            if (resultUpdateCart.IsSuccessStatusCode)
-            {
-
-                return RedirectToAction("index");
-            }
-            return RedirectToAction("index");
-        }
+    
 
         public async Task<IActionResult> DeleteTheProductInCart(string cartId, string productId)
         {
-            var apiUri = $"https://localhost:7185/api/shoppingcart/deleteproductincart/{cartId}/{productId}";
-            var result = await _httpClient.DeleteAsync(apiUri);
+            var apiUri = cartApiUri + $"/deleteproductincart/{cartId}/{productId}";
+            var response = await _httpApiRequest.DeleteAsync(apiUri);
             return RedirectToAction("index");
+        }
+        private async Task<ShoppingCartUpdateVM> CheckCart(string id)
+        {
+            string checkCartUri = cartApiUri + $"/getcart/{id}";
+            var response = await _httpApiRequest.GetAsync(checkCartUri);
+            if (response.IsSuccessStatusCode)
+            {
+                return await _httpApiRequest.DeserializeJsonToModelForSingle<ShoppingCartUpdateVM>(response);
+            }
+            return null;
         }
     }
 }

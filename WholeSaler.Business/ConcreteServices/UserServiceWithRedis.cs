@@ -9,13 +9,14 @@ using WholeSaler.Business.AbstractServices;
 using WholeSaler.Business.ConcreteRepo;
 using WholeSaler.Business.Redis_Cache.Abstracts;
 using WholeSaler.Entity.Entities;
+using WholeSaler.Entity.Entities.MongoIdentity;
 
 namespace WholeSaler.Business.ConcreteServices
 {
     public class UserServiceWithRedis : MongoWithRedisRepo<User>, IUserServiceWithRedis
     {
         private readonly BaseMongoDBRepo<User> _mongoDB;
-
+        private readonly string entitykey = typeof(User).Name;
         public UserServiceWithRedis(IRedis_Cache<User> redis, BaseMongoDBRepo<User> mongoDB) : base(redis, mongoDB)
         {
             _mongoDB = mongoDB;

@@ -22,6 +22,10 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Comprehensive;
 using wholesaler.web.helpers.producthelper;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.BaseProduct;
+using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.Consricted;
+using FluentValidation;
+using WholeSaler.Web.FluentValidation.Validators.Product;
+using WholeSaler.Web.FluentValidation.Configs;
 
 
 namespace WholeSaler.Web.Areas.Auth.Controllers
@@ -33,20 +37,24 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
         private const string apiUri = "https://localhost:7185/api/product";
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IValidationService<ProductComprehensiveVM> _prdValidator;
+        private readonly IValidationService<ProductEditVM> _prdEditValidator;
         private readonly HttpClient _httpClient;
 
 
-        public ProductController(IHttpClientFactory httpClientFactory, UserManager<AppUser> userManager)
+        public ProductController(IHttpClientFactory httpClientFactory, UserManager<AppUser> userManager, IValidationService<ProductComprehensiveVM> prdValidator, IValidationService<ProductEditVM> prdEditValidator)
         {
             _httpClientFactory = httpClientFactory;
             _userManager = userManager;
+            _prdValidator = prdValidator;
+            _prdEditValidator = prdEditValidator;
             _httpClient = _httpClientFactory.CreateClient();
         }
 
-
-
         [HttpGet]
-        public async Task<IActionResult> Index(string categoryId,string ascending)
+        //[Route("auth/product/{productName?}")]
+
+        public async Task<IActionResult> Index(string productName,string categoryId,string subcategoryId,string ascending)
         {
             var storeId = "";
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -66,11 +74,7 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
                 var jsonString = await response.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<List<MyStoreVM>>(jsonString);
                 data = data.OrderByDescending(x => x.SumofSales).ToList();
-                if (ascending != null)
-                {
-                    data = data.OrderBy(x => x.SumofSales).ToList();
-                   
-                }
+             
              
 
                 var categoryUri = "https://localhost:7185/api/category";
@@ -79,13 +83,39 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
                 var categoryData = JsonConvert.DeserializeObject<List<CategoryVM>>(categoryJson);
                 ViewBag.Categories = categoryData;
                 ViewData["storeId"] = storeId;
+
+                if (!string.IsNullOrEmpty(productName))
+                {
+
+                    var lowerCasePrefix = productName.Substring(0, Math.Min(3, productName.Length)).ToLower();
+
+                    data = data.Where(x => x.Name.ToLower().StartsWith(lowerCasePrefix)).ToList();
+                    if (data.Count > 0) { return View(data); }
+                    else
+                    {
+                        TempData["productNameMessage"] = $"{productName} is not found";
+                        return RedirectToAction("index", "product", new {area="auth"});
+                    }
+
+
+                }
+
+                if (categoryId != null && subcategoryId!=null)
+                {
+                    var filterProducts = data.Where(x => x.Category.CategoryId == categoryId && x.Category.SubCategory.Id== subcategoryId).ToList();
+                    return View(filterProducts);
+                }
                 if (categoryId != null)
                 {
                     var filterProducts = data.Where(x => x.Category.CategoryId == categoryId).ToList();
                     return View(filterProducts);
                 }
 
+                if (ascending != null)
+                {
+                    data = data.OrderBy(x => x.SumofSales).ToList();
 
+                }
                 return View(data);
             }
             return View();
@@ -114,10 +144,10 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
             {
                 var jsonString = await response.Content.ReadAsStringAsync();
                 var data = ProductHelper.ChangeTypeForUpdateGet(jsonString);
-                
+                var partialViewName = $"~/Areas/Auth/Views/Shared/PartialViews/ProductUpdate/{data.Type.ToLower()}.cshtml";
 
 
-                return View(data);
+                return PartialView(partialViewName, data);
 
 
             }
@@ -125,8 +155,19 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(ProductEditPostVM editVM, List<IFormFile>? productImages, ProductImageUpdateVm imageUpdateVm)
+        public async Task<IActionResult> Edit(ProductEditVM editVM, List<IFormFile>? productImages, ProductImageUpdateVm imageUpdateVm)
         {
+         
+            var errors = _prdEditValidator.GetValidationErrors(editVM);
+            if (errors.Any())
+            {
+                ModelStateHelper.AddErrorsToModelState(ModelState, errors);
+                var partialViewName = $"~/Areas/Auth/Views/Shared/PartialViews/ProductUpdate/{editVM.Type.ToLower()}.cshtml";
+                ViewBag.Errors = errors;
+                return PartialView(partialViewName, editVM);
+
+            }
+
             var productData = editVM;
             if (productImages.Any())
             {
@@ -220,7 +261,7 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Category(string categoryId,string subCategoryId)
+        public async Task<IActionResult> SelectCategory()
         {
             var categoryUri = "https://localhost:7185/api/category";
             var response = await _httpClient.GetAsync(categoryUri);
@@ -228,47 +269,32 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
             {
                 var categoryJson = await response.Content.ReadAsStringAsync();
                 var categoryData = JsonConvert.DeserializeObject<List<CategoryVM>>(categoryJson);
-                var data = categoryData.Where(x=>x.Id == categoryId).FirstOrDefault();
-                foreach (var sb in data.SubCategories)
-                {
-                    if (sb.Id == subCategoryId)
-                    {
-                        ViewBag.SelectedCategoryId = data.Id;
-                        ViewBag.SelectedCategoryName = data.Name;
-                        ViewBag.SelectedSubCategoryId = sb.Id;
-                        ViewBag.SelectedSubCategoryName = sb.Name;
-
-                        var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                        string storesGetFromeApi = $"https://localhost:7185/api/store";
-                        var responseStore = await _httpClient.GetAsync(storesGetFromeApi);
-                        if (responseStore.IsSuccessStatusCode)
-                        {
-
-                            var jsonString = await responseStore.Content.ReadAsStringAsync();
-                            var storeData = JsonConvert.DeserializeObject<List<StoreVM>>(jsonString);
-                            var userStore = storeData.Where(x => x.UserId == userId).FirstOrDefault();
-                            ViewData["StoreName"] = userStore.Name;
-                            ViewData["StoreId"] = userStore.Id;
-
-
-
-
-
-
-
-                            return PartialView($"~/Areas/Auth/Views/Shared/PartialViews/Product/{sb.Name.ToLower()}.cshtml");
-                        }
-
-                    }
-                }
+                return View(categoryData);
             }
 
-           
             return View();
+
+        }
+        [HttpPost]
+        public async Task<IActionResult> SelectCategory(string categoryName,string categoryId,string subCategoryName,string subCategoryId)
+        {
+            TempData["CategoryName"] = categoryName;
+            TempData["CategoryId"] = categoryId;
+            TempData["SubCategoryName"] = subCategoryName;
+            TempData["SubCategoryId"] = subCategoryId;
+
+            return RedirectToAction("Create", "product", new {area="auth"});
+
         }
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(ProductComprehensiveVM comprehensiveVM)
         {
+            var categoryName = TempData["CategoryName"] as string;
+            var categoryId = TempData["CategoryId"] as string;
+            var subCategoryName = TempData["SubCategoryName"] as string;
+            var subCategoryId = TempData["SubCategoryId"] as string;
+            var model = (categoryName, categoryId, subCategoryName, subCategoryId);
+            ViewBag.Categorydata = model;
 
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             string storesGetFromeApi = $"https://localhost:7185/api/store";
@@ -281,7 +307,17 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
                 var userStore = data.Where(x => x.UserId == userId).FirstOrDefault();
                 ViewData["StoreName"] = userStore.Name;
                 ViewData["StoreId"] = userStore.Id;
-                return View();
+                if (model.subCategoryName != null) 
+                { 
+                var partialViewName = $"~/Areas/Auth/Views/Shared/PartialViews/Product/{model.subCategoryName.ToLower()}.cshtml";
+                    return PartialView(partialViewName);
+                }
+                if(comprehensiveVM.Category.SubCategory.Name!=null)
+                {
+                    var partialViewName = $"~/Areas/Auth/Views/Shared/PartialViews/Product/{comprehensiveVM.Category.SubCategory.Name.ToLower()}.cshtml";
+                    return PartialView(partialViewName,comprehensiveVM);
+                }
+                
 
             }
 
@@ -290,6 +326,15 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ProductComprehensiveVM comprehensiveVM, List<IFormFile> productImages)
         {
+            var errors = _prdValidator.GetValidationErrors(comprehensiveVM);
+            if (errors.Any())
+            {
+                ModelStateHelper.AddErrorsToModelState(ModelState, errors);
+                var partialViewName = $"~/Areas/Auth/Views/Shared/PartialViews/Product/{comprehensiveVM.Category.SubCategory.Name.ToLower()}.cshtml";
+                ViewBag.Errors = errors;
+                return PartialView(partialViewName, comprehensiveVM);
+
+            }
 
             if (comprehensiveVM.Images == null)
             {

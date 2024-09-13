@@ -1,6 +1,10 @@
 ﻿@model object
 @using System.Reflection
 @using WholeSaler.Web.Areas.Auth.Views.Shared.Components.DynamicForm
+@using WholeSaler.Web.FluentValidation.Configs
+@{
+    var errors = ViewBag.Errors;
+}
 
 @foreach (var property in Model.GetType().GetProperties())
 {
@@ -41,7 +45,7 @@ else if (property.PropertyType == typeof(bool) || property.PropertyType == typeo
             <div class="form-group">
                 <label for="@name">@displayName</label>
                 <input type="number" name="@name" class="form-control" value="@propertyValue" />
-                <span data-valmsg-for="@name" class="text-danger"></span>
+                <span asp-validation-for="@name" class="text-danger"></span>
             </div>
         }
         else
@@ -49,9 +53,20 @@ else if (property.PropertyType == typeof(bool) || property.PropertyType == typeo
             <div class="form-group">
                 <label for="@name">@displayName</label>
                 <input type="text" name="@name" class="form-control" value="@propertyValue" />
-                <span data-valmsg-for="@name" class="text-danger"></span>
+                <span asp-validation-for ="@name" class="text-danger"></span>
             </div>
         }
      
+    }
+
+    if (errors != null)
+    {
+        foreach (var err in errors)
+        {
+            if (err.PropertyName == name)
+            {
+                <span class="text-danger">@err.ErrorMessage</span>
+            }
+        }
     }
 }

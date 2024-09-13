@@ -5,68 +5,125 @@
     var cartId = ViewBag.CartId;
     var CardTotalAmount = ViewBag.CartTotalAmount;
     var userId = ViewData["userId"];
+    var username = ViewData["username"];
 }
+
+<style>
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* Ensures it's above other content */
+    }
+
+    .popup-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        text-align: center;
+    }
+
+    .popup-buttons {
+        margin-top: 20px;
+    }
+
+        .popup-buttons button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+</style>
+
+
 <div class="row">
     <div class="col-md-12">
         <form id="paymentForm" method="post">
 
 
 
-            
+
             <div class="row">
+          
                 <div class="col-md-6">
                     <h4>Adress Bilgileri</h4>
                     <div class="border-2" style="border:solid;border-color:darksalmon">
                         <div style="margin-left:5px;margin-right:5px;margin-bottom:5px;">
+                            <div class="form-group" style="width:50%;margin-top:5px">
+                                <select id="selectAddress" class="form-control">
+                                    <option>Select Address</option>
+                                </select>
+                            </div>
                             <div class="form-group">
                                 <label asp-for="@Model.ShippingAddress.Header"></label>
-                                <input type="type" asp-for="@Model.ShippingAddress.Header" value=""  class="form-control" />
+                                <input id="headerField" type="type" asp-for="@Model.ShippingAddress.Header" value="" class="form-control" />
                                 <span asp-validation-for="@Model.ShippingAddress.Header" class="text-danger"></span>
                             </div>
                             <div class="form-group">
                                 <label asp-for="@Model.ShippingAddress.Country"></label>
-                                <input type="type" asp-for="@Model.ShippingAddress.Country" value="Türkiye" id="countryInput" class="form-control" />
+                                <input id="countryField" type="type" asp-for="@Model.ShippingAddress.Country" value="Türkiye" class="form-control" />
                                 <span asp-validation-for="@Model.ShippingAddress.Country" class="text-danger"></span>
                             </div>
                             <div class="form-group">
-                                <label asp-for="@Model.ShippingAddress.City"></label>                             
-                                <input type="text" id="cityInput" asp-for="@Model.ShippingAddress.City" value="" class="form-control" />
+                                <label asp-for="@Model.ShippingAddress.City"></label>
+                                <input id="cityField" type="text" asp-for="@Model.ShippingAddress.City" value="" class="form-control" />
                                 <span asp-validation-for="@Model.ShippingAddress.City" class="text-danger"></span>
                             </div>
                             <div class="form-group">
                                 <label asp-for="@Model.ShippingAddress.District"></label>
-                                <input type="type" asp-for="@Model.ShippingAddress.District" value="" id="districtInput" class="form-control" />
+                                <input id="districtField" type="type" asp-for="@Model.ShippingAddress.District" value="" id="districtInput" class="form-control" />
                                 <span asp-validation-for="@Model.ShippingAddress.District" class="text-danger"></span>
                             </div>
                             <div class="form-group">
                                 <label asp-for="@Model.ShippingAddress.Neighborhood"></label>
-                                <input type="type" asp-for="@Model.ShippingAddress.Neighborhood" value=""  class="form-control" />
+                                <input id="neighborhoodField" type="type" asp-for="@Model.ShippingAddress.Neighborhood" value="" class="form-control" />
                                 <span asp-validation-for="@Model.ShippingAddress.Neighborhood" class="text-danger"></span>
                             </div>
                             <div class="form-group">
                                 <label asp-for="@Model.ShippingAddress.ZipCode"></label>
-                                <input type="type" asp-for="@Model.ShippingAddress.ZipCode" value="" id="zipCodeInput" class="form-control" />
+                                <input id="zipCodeField" type="type" asp-for="@Model.ShippingAddress.ZipCode" value="" id="zipCodeInput" class="form-control" />
                                 <span asp-validation-for="@Model.ShippingAddress.ZipCode" class="text-danger"></span>
                             </div>
                             <div class="form-group">
                                 <label asp-for="@Model.ShippingAddress.ApartmentInfo"></label>
-                                <input type="type" asp-for="@Model.ShippingAddress.ApartmentInfo" value="" id="apartmentNoInput" class="form-control" />
+                                <input id="apartmentInfoField" type="type" asp-for="@Model.ShippingAddress.ApartmentInfo" value="" id="apartmentNoInput" class="form-control" />
                                 <span asp-validation-for="@Model.ShippingAddress.ApartmentInfo" class="text-danger"></span>
                             </div>
                             <div class="form-group">
                                 <label asp-for="@Model.ShippingAddress.Description"></label>
-                                <input type="type" asp-for="@Model.ShippingAddress.Description" value="" id="descriptionInput" class="form-control" />
+                                <input id="descriptionField" type="type" asp-for="@Model.ShippingAddress.Description" value="" id="descriptionInput" class="form-control" />
                                 <span asp-validation-for="@Model.ShippingAddress.Description" class="text-danger"></span>
                             </div>
+                           
+
+                                <button type="button" id="savingAdress" style="background-color:green">Save Address</button>
+                            <div id="confirmationPopup" class="popup-overlay" style="display:none;">
+                                <div class="popup-content">
+                                    <h4>Do you want to save this address?</h4>
+                                    <div class="popup-buttons">
+                                        <button id="confirmSave">OK</button>
+                                        <button id="cancelSave">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                  
                         </div>
-                       
+
                     </div>
+                   
                 </div>
                 <div class="col-md-6">
                     <h4>Ödeme Bilgileri</h4>
                     <div class="border-2" style="border:solid;border-color:green">
                         <div style="margin-left:5px;margin-right:5px;margin-bottom:5px;">
                             <input type="text" asp-for="@Model.UserId" value="@userId" hidden />
+                            <input type="text" asp-for="@Model.Username" value="@username" hidden />
                             <input type="text" asp-for="@Model.ShoppingCartId" value="@cartId" hidden />
                             <div class="form-group">
                                 <label asp-for="@Model.OrderPayment.CardOwnerName"></label>
@@ -87,21 +144,129 @@
                                 <label asp-for="@Model.OrderPayment.CardCvv"></label>
                                 <input id="cardCvv" type="text" asp-for="@Model.OrderPayment.CardCvv" value="" class="form-control" />
                                 <span asp-validation-for="@Model.OrderPayment.CardCvv" class="text-danger"></span>
-                              
+
 
                             </div>
                         </div>
                     </div>
                     <div class="text-center">
-                    <div><h3 id="totalAmount">Ödenecek Toplam tutar: @CardTotalAmount TL</h3></div>
-                    <input type="hidden" asp-for="TotalOrderAmount" value="@CardTotalAmount">
-                    <button class="btn btn-outline-success" type="submit">Siparişi Tamamla</button>
+                        <div><h3 id="totalAmount">Ödenecek Toplam tutar: @CardTotalAmount TL</h3></div>
+                        <input type="hidden" asp-for="TotalOrderAmount" value="@CardTotalAmount">
+                        <button class="btn btn-outline-success" type="submit">Siparişi Tamamla</button>
                     </div>
                 </div>
-                
+
             </div>
-           
+
         </form>
     </div>
 </div>
 
+<script>
+    document.getElementById("savingAdress").addEventListener("click", function () {
+        event.preventDefault();
+        document.getElementById("confirmationPopup").style.display = "flex";
+    });
+
+    document.getElementById("confirmSave").addEventListener("click", function () {
+        // Proceed with saving the address
+        const addressData = {
+            Header: document.getElementById('headerField').value,
+            Country: document.getElementById('countryField').value,
+            City: document.getElementById('cityField').value,
+            District: document.getElementById('districtField').value,
+            ApartmentInfo: document.getElementById('apartmentInfoField').value,
+            Neighborhood: document.getElementById('neighborhoodField').value,
+            ZipCode: document.getElementById('zipCodeField').value,
+            Description: document.getElementById('descriptionField').value
+        };
+
+        fetch('/User/AddAdress', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(addressData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Address updated successfully', data);
+                updateAddressList(data);
+            })
+            .catch(error => {
+                console.error('Error updating address:', error);
+            });
+
+        event.preventDefault();
+        document.getElementById("confirmationPopup").style.display = "none";
+    });
+
+    document.getElementById("cancelSave").addEventListener("click", function () {
+        event.preventDefault();
+        document.getElementById("confirmationPopup").style.display = "none";
+    });
+
+    // Function to update the address list dynamically in the UI
+    function updateAddressList(addresses) {
+        const addressList = document.getElementById('addressList');
+        addressList.innerHTML = ''; // Clear the current list
+        addresses.forEach(address => {
+            const newAddressElement = document.createElement('li');
+            newAddressElement.textContent = `${address.Header}, ${address.Country}, ${address.City}, ${address.District},${address.Neighborhood}, ${address.ApartmentInfo}, ${address.ZipCode}, ${address.Description}`;
+            addressList.appendChild(newAddressElement);
+        });
+    }
+
+    window.onload = function () {
+        const userId = `c5e2fc96-099f-4d78-8802-db2d7263dc6e`;
+        const apiUrl = `https://localhost:7185/api/user/${userId}`;
+        let addressData = [];  // Store fetched addresses
+
+        // Fetch the data when the page loads
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Data fetched:', data);
+                addressData = data.addresses;  // Save addresses for later use
+                const selectAddress = document.getElementById('selectAddress');
+
+                // Populate the select dropdown
+                data.addresses.forEach((address, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;  // Use index as value for easy reference
+                    option.text = address.header;
+                    selectAddress.appendChild(option);
+                });
+
+                // Add event listener to the select element to update inputs
+                selectAddress.addEventListener('change', function () {
+                    const selectedIndex = selectAddress.value;
+                    const selectedAddress = addressData[selectedIndex];  // Get selected address details
+
+                    // Populate input fields with the selected address data
+                    document.getElementById('headerField').value = selectedAddress.header || '';
+                    document.getElementById('countryField').value = selectedAddress.country || '';
+                    document.getElementById('cityField').value = selectedAddress.city || '';
+                    document.getElementById('districtField').value = selectedAddress.district || '';
+                    document.getElementById('neighborhoodField').value = selectedAddress.neighborhood || '';
+                    document.getElementById('apartmentInfoField').value = selectedAddress.apartmentInfo || '';
+                    document.getElementById('zipCodeField').value = selectedAddress.zipCode || '';
+                    document.getElementById('descriptionField').value = selectedAddress.description || '';
+                });
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+    };
+
+</script>

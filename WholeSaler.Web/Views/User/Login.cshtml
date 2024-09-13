@@ -3,18 +3,31 @@
 @{
     ViewData["Title"] = "Login";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var wrongLoginMessage = ViewBag.ErrorMessage as string;
     var returnUrl = ViewBag.ReturnUrl;
 }
 
 
+@if (!string.IsNullOrEmpty(wrongLoginMessage))
+{
+
+    <div class="alert alert-danger">
+        <div class="d-flex justify-content-center align-items-center">
+            <h6>@wrongLoginMessage</h6>
+
+        </div>
+    </div>
 
 
-
+}
 
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6" >
+
+
+
+        <div class="col-md-6">
             <div class="card" style="background-color:#ff7400;border-radius: 2em;">
                 <div class="card-body">
                     <form asp-action="login" asp-controller="user">
@@ -25,14 +38,16 @@
                         </div>
                         <div class="form-group">
                             <label asp-for="Password"></label>
-                            <input type="password" asp-for="Password" class="form-control" style="border-radius: 2em;" />
+                            <input id="passwordInput" type="password" asp-for="Password" class="form-control" style="border-radius: 2em;" />
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
+                        <button type="button" id="togglePassword" style="background-color:transparent;border:none;"> <i id="togglePassword" class="fa fa-eye"></i></button>
+                       
                         <div>
                             <a href="/user/ForgotPassword">Forgot Password?</a>
                         </div>
                         <div class="form-group text-center" style="margin-top:10px">
-                            <input name="returnUrl" hidden="">
+                            <input name="returnUrl" value="@returnUrl" hidden>
                             <input type="submit" value="Login" class="btn btn-primary form-control" style="width:50%">
                         </div>
                     </form>
@@ -48,3 +63,17 @@
         </div>
     </div>
 </div>
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function (e) {
+        const passwordInput = document.getElementById('passwordInput');
+    
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+        
+        } else {
+            passwordInput.type = "password";
+        
+        }
+    });
+</script>

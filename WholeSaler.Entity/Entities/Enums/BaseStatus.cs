@@ -9,6 +9,7 @@ namespace WholeSaler.Entity.Entities.Enums
     public enum BaseStatus
     {
         Active,
-        Passive
+        Passive,
+        Deleted
     }
 }

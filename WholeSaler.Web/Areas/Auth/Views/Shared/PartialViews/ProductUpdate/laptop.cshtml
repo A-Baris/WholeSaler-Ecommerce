@@ -1,190 +1,26 @@
-﻿@model WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.ProductEditVM
+﻿@model ProductEditVM
 @{
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+    var errors = ViewBag.Errors;
 }
-@await Component.InvokeAsync("DynamicForm", Model.Laptop) 
-@*  <h6>Edit Partial view</h6>
+@if (errors != null)
+{
+    <h6 style="color:red">*(Please check validation errors!)*</h6>
+}
 
+
+<form asp-controller="product" asp-action="edit" asp-area="auth" method="post" enctype="multipart/form-data">
     <div class="form-group">
-        <label asp-for="Laptop.Name"></label>
-        <input asp-for="Laptop.Name" class="form-control" value="@Model.Laptop.Name" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+        <label>Product Images</label>
+        <input type="file" class="form-control" name="productImages" multiple>
+        <span class="text-muted">You should use "ctrl" to choose more than one image.</span>
+    </div>
+    <input name="Type" value="@Model.Type" hidden />
+@await Component.InvokeAsync("DynamicForm", Model.Laptop)
 
+    <div class="text-center">
+
+        <button type="submit" class="btn btn-primary" style="margin-top:10px">Edit</button>
     </div>
 
-    <div class="form-group">
-        <label asp-for="Laptop.Brand"></label>
-        <input asp-for="Laptop.Brand" class="form-control" value="@Model.Laptop.Brand" />
-        <span asp-validation-for="Laptop.Brand" class="text-danger"></span>
-
-    </div>
-    <div class="form-group">
-        <label asp-for="Laptop.Color"></label>
-        <input asp-for="Laptop.Color" class="form-control" value="@Model.Laptop.Color" />
-        <span asp-validation-for="Laptop.Color" class="text-danger"></span>
-
-    </div>
- 
-    <div class="form-group">
-        <label asp-for="Laptop.Stock"></label>
-        <input asp-for="Laptop.Stock" class="form-control" value="@Model.Laptop.Stock" />
-        <span asp-validation-for="Laptop.Stock" class="text-danger"></span>
-
-    </div>
-    <div class="form-group">
-        <label asp-for="Laptop.UnitPrice"></label>
-        <input asp-for="Laptop.UnitPrice" class="form-control" value="@Model.Laptop.UnitPrice" />
-        <span asp-validation-for="Laptop.UnitPrice" class="text-danger"></span>
-
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Laptop.Description"></label>
-        <input asp-for="Laptop.Description" class="form-control" value="@Model.Laptop.Description" />
-        <span asp-validation-for="Laptop.Description" class="text-danger"></span>
-
-    </div>
-<div class="form-group">
-    <label asp-for="Laptop.LaptopType"></label>
-    <select asp-for="Laptop.LaptopType" class="form-control">
-        <option value="@Model.Laptop.LaptopType">@Model.Laptop.LaptopType</option>
-        <option value="Notebook">Notebook</option>
-        <option value="Gaming">Gaming</option>
-        <option value="All-in-one">All-in-one</option>
-    </select>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.OperatingSystem"></label>
-    <input asp-for="Laptop.OperatingSystem" class="form-control" />
-    <span asp-validation-for="Laptop.OperatingSystem" class="text-danger"></span>
-
-</div>
-
-
-
-<div class="form-group">
-    <label asp-for="Laptop.Processor"></label>
-    <input asp-for="Laptop.Processor" class="form-control" />
-    <span asp-validation-for="Laptop.Processor" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.ProcessorGeneration"></label>
-    <input asp-for="Laptop.ProcessorGeneration" class="form-control" />
-    <span asp-validation-for="Laptop.ProcessorGeneration" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.RAM"></label>
-    <input asp-for="Laptop.RAM" class="form-control" />
-    <span asp-validation-for="Laptop.RAM" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.SsdCapacity"></label>
-    <input asp-for="Laptop.SsdCapacity" class="form-control" />
-    <span asp-validation-for="Laptop.SsdCapacity" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.HarddiskCapacity"></label>
-    <input asp-for="Laptop.HarddiskCapacity" class="form-control" />
-    <span asp-validation-for="Laptop.HarddiskCapacity" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.VideoCard"></label>
-    <input asp-for="Laptop.VideoCard" class="form-control" />
-    <span asp-validation-for="Laptop.VideoCard" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.VideoCardType"></label>
-    <input asp-for="Laptop.VideoCardType" class="form-control" />
-    <span asp-validation-for="Laptop.VideoCardType" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.VideoCardRam"></label>
-    <input asp-for="Laptop.VideoCardRam" class="form-control" />
-    <span asp-validation-for="Laptop.VideoCardRam" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.ScreenSize"></label>
-    <input asp-for="Laptop.ScreenSize" class="form-control" />
-    <span asp-validation-for="Laptop.ScreenSize" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.ScreenType"></label>
-    <input asp-for="Laptop.ScreenType" class="form-control" />
-    <span asp-validation-for="Laptop.ScreenType" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.ScreenResolution"></label>
-    <input asp-for="Laptop.ScreenResolution" class="form-control" />
-    <span asp-validation-for="Laptop.ScreenResolution" class="text-danger"></span>
-
-</div>
-<div class="form-group">
-    <label asp-for="Laptop.DeviceWeight"></label>
-    <input asp-for="Laptop.DeviceWeight" class="form-control" />
-    <span asp-validation-for="Laptop.DeviceWeight" class="text-danger"></span>
-
-</div>
-<div class="form-group col-md-2">
-    <label asp-for="Laptop.Hdmi"></label>
-    <select asp-for="Laptop.Hdmi" class="form-control form-control-sm">
-        <option value="@Model.Laptop.Hdmi">@Model.Laptop.Hdmi</option>
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-    </select>
-
-</div>
-<div class="form-group col-md-2">
-    <label asp-for="Laptop.TouchingScreen"></label>
-    <select asp-for="Laptop.TouchingScreen" class="form-control form-control-sm">
-        <option value="@Model.Laptop.TouchingScreen">@Model.Laptop.TouchingScreen</option>
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-    </select>
-</div>
-<div class="form-group col-md-2">
-    <label asp-for="Laptop.FingerPrintReeder"></label>
-    <select asp-for="Laptop.FingerPrintReeder" class="form-control form-control-sm">
-        <option value="@Model.Laptop.FingerPrintReeder">@Model.Laptop.FingerPrintReeder</option>
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-    </select>
-
-</div>
-<div class="form-group col-md-2">
-    <label asp-for="Laptop.OpticalDrive"></label>
-    <select asp-for="Laptop.OpticalDrive" class="form-control form-control-sm">
-        <option value="@Model.Laptop.OpticalDrive">@Model.Laptop.OpticalDrive</option>
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-    </select>
-
-</div>
-<div class="form-group col-md-2">
-    <label asp-for="Laptop.CardReeder"></label>
-    <select asp-for="Laptop.CardReeder" class="form-control form-control-sm">
-        <option value="@Model.Laptop.CardReeder">@Model.Laptop.CardReeder</option>
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-    </select>
-
-</div>
-
-
-
-<input type="text" asp-for="Laptop.Id" value="@Model.Laptop.Id" hidden>
-<input type="text" asp-for="Laptop.SumOfSales" value="@Model.Laptop.SumOfSales" hidden>  *@
-
-
-  
-
-
+</form>

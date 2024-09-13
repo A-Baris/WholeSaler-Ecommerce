@@ -33,7 +33,7 @@ namespace WholeSaler.Business.ConcreteServices
         {
        
             var orderCollection = _mongoDB.GetCollection();
-            var orders = await orderCollection.Find(o =>
+            var orders = await orderCollection.Find(o =>o.Status==BaseStatus.Passive &&
            o.Products.Any(p => p.Store.StoreId == storeId) &&
            (o.CreatedDate.DayOfYear >= startDate.DayOfYear && o.CreatedDate.DayOfYear <= endDate.DayOfYear))
        .ToListAsync();
@@ -63,6 +63,6 @@ namespace WholeSaler.Business.ConcreteServices
 
 
         }
-
+       
     }
 }

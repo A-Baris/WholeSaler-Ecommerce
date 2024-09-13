@@ -12,6 +12,7 @@ using WholeSaler.Web.Areas.Admin.Models.ViewModels.Store;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Category;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Store;
+using WholeSaler.Web.Helpers.HttpClientApiRequests;
 using WholeSaler.Web.Helpers.IdentyClaims;
 using WholeSaler.Web.MongoIdentity;
 using WholeSaler.Web.Utility;
@@ -24,16 +25,17 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IHttpApiRequest _httpApiRequests;
         private readonly HttpClient _httpClient;
      
-
         private const string apiUri = "https://localhost:7185/api/store";
 
 
-      public StoreController(IHttpClientFactory httpClientFactory,UserManager<AppUser> userManager)
+      public StoreController(IHttpClientFactory httpClientFactory,UserManager<AppUser> userManager,IHttpApiRequest httpApiRequests)
         {
             _httpClientFactory = httpClientFactory;
            _userManager = userManager;
+         _httpApiRequests = httpApiRequests;
             _httpClient = _httpClientFactory.CreateClient();
      
         }
@@ -43,17 +45,19 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
         {
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var user = await _userManager.FindByIdAsync(userId);
-
             var getStoreUri = $"https://localhost:7185/api/store/mystore/{userId}";
-            var response =await _httpClient.GetAsync(getStoreUri);
+            //var response =await _httpClient.GetAsync(getStoreUri);
+            var response = await _httpApiRequests.GetAsync(getStoreUri);
             if (response.IsSuccessStatusCode)
             {
-                var storeJson = await response.Content.ReadAsStringAsync();
-                var storeData = JsonConvert.DeserializeObject<StoreVM>(storeJson);
+                //var storeJson = await response.Content.ReadAsStringAsync();
+                //var storeData = JsonConvert.DeserializeObject<StoreVM>(storeJson);
+                var storeData = await _httpApiRequests.DeserializeJsonToModelForSingle<StoreVM>(response);
                 if (storeData.AdminConfirmation != Admin.Models.Enums.AdminConfirmation.Accepted)
                 {
                     return RedirectToAction("applicationdetails", "store");
                 }
+
                 else
                 {
                     return View();
@@ -61,7 +65,7 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
             }
 
 
-            return View();
+            return RedirectToAction("create", "store");
         }
 
         [HttpGet]
@@ -101,7 +105,13 @@ namespace WholeSaler.Web.Areas.Auth.Controllers
         }
 
 
+        //order cancellation requests
+        [HttpGet]
+        public async Task<IActionResult> CancellationRequests(string orderId)
+        {
 
+            return View();
+        }
 
 
 

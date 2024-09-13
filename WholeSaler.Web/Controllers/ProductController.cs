@@ -7,26 +7,23 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using WholeSaler.Web.Utility;
 using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product.BaseProduct;
+using WholeSaler.Web.Helpers.HttpClientApiRequests;
 
 namespace WholeSaler.Web.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly HttpClient _httpClient;
 
-        public ProductController(IHttpClientFactory httpClientFactory)
+        private readonly IHttpApiRequest _httpApiRequest;
+        private readonly string productApiUri = "https://localhost:7185/api/product";
+
+        public ProductController(IHttpApiRequest httpApiRequest)
         {
-            _httpClientFactory = httpClientFactory;
-            _httpClient = _httpClientFactory.CreateClient();
+ 
+          _httpApiRequest = httpApiRequest;
+        
         }
-        //public async Task<IActionResult> SearchProduct(string productName)
-        //{
-        //    var productApiUri = "https://localhost:7185/api/product";
-        //    var result = await _httpClient.GetAsync(productApiUri);
-        //    var jsonString = await result.Content.ReadAsStringAsync();
-        //    return View();
-        //}
+     
         public async Task<IActionResult> Details(string productId)
         {
             var returnUrl = Url.Action("Details", "product", new { productId });
@@ -37,13 +34,12 @@ namespace WholeSaler.Web.Controllers
             var visitorId = Request.Cookies["visitor"];
             ViewData["uId"] =userId;
             ViewData["visitorId"]=visitorId;
-            var getProductUri = $"https://localhost:7185/api/product/{productId}";
-            SetAuthHeader.SetAuthorizationHeader(_httpClient,Request);
-            var response = await _httpClient.GetAsync(getProductUri);
-            if (response.IsSuccessStatusCode)
+            var getProductUri = productApiUri +$"/{productId}";
+            //SetAuthHeader.SetAuthorizationHeader(Request);
+            var productResponse = await _httpApiRequest.GetAsync(getProductUri);
+            if (productResponse.IsSuccessStatusCode)
             {
-                var jsonProduct = await response.Content.ReadAsStringAsync();
-                var productData = JsonConvert.DeserializeObject<ProductVm>(jsonProduct);
+                var productData = await _httpApiRequest.DeserializeJsonToModelForSingle<ProductVm>(productResponse);
                 if (productData != null) 
                 {
                  return View(productData);
@@ -63,10 +59,8 @@ namespace WholeSaler.Web.Controllers
             commentVM.Username = username;
             commentVM.CreatedDate = DateTime.Now;
 
-            var updateProductUri = $"https://localhost:7185/api/product/AddComment/{productId}";
-            var json = JsonConvert.SerializeObject(commentVM);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            var result = await _httpClient.PutAsync(updateProductUri, content);
+            var updateProductUri = productApiUri + "/AddComment/{productId}";
+            var result = await _httpApiRequest.PutAsync(updateProductUri, commentVM);
             return RedirectToAction("details", "product", new { productId = productId });
         }
     }

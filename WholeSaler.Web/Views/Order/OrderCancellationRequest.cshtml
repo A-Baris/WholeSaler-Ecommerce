@@ -1,0 +1,27 @@
+﻿@model WholeSaler.Web.Models.ViewModels.OrderVM.OrderEditVm
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var orderId = ViewData["orderId"];
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+
+
+
+        <div class="col-md-6">
+            <form asp-action="ordercancellationrequest" asp-controller="order" method="post">
+                <input asp-for="@Model.Id" value="@orderId" hidden/>
+                <div class="form-group">
+                      
+                    <input class="form-control" placeholder="Title" asp-for="@Model.CancellationRequest.Title"/>
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" placeholder="Please share reasons of cancellation" style="height:175px" asp-for="@Model.CancellationRequest.Description"></textarea>
+                </div>
+                <div class="form-group text-center" style="margin-top:10px">
+                    <button type="submit" class="btn btn-danger">Create Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

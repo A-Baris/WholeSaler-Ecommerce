@@ -7,9 +7,9 @@ using WholeSaler.Entity.Entities.Enums;
 
 namespace WholeSaler.Entity.Entities
 {
-    public class Store:BaseEntity
+    public class Store : BaseEntity
     {
-  
+
         public Store()
         {
             AdminConfirmation = 0;
@@ -24,6 +24,5 @@ namespace WholeSaler.Entity.Entities
 
         public string? UserId { get; set; }
         public string? ConnectionId { get; set; }
-
     }
 }

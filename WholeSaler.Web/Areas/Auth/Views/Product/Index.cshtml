@@ -7,37 +7,76 @@
 
 }
 
+<style>
+    .category {
+        display: inline-block;
+        /*         margin: 20px; */
+        padding: 5px;
+        /*         border: 1px solid #ccc; */
+        /*     cursor: pointer; */
+    }
+
+    .subcategory-container {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        min-width: 150px;
+    }
+
+    .subcategory {
+        padding: 12px 16px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .category:hover .subcategory-container,
+    .category .subcategory-container:hover {
+        display: block;
+    }
+
+    .subcategory {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+        .subcategory:last-child {
+            border-bottom: none;
+        }
+</style>
+
 <div class="col-md-12">
    
-    <div id="categories" class="row" style="margin-bottom:5px;">
-       
-            <a class="btn btn-primary" asp-action="create" asp-controller="product" asp-area="auth" style="border-radius:50px;width:120px;height:40px;">Add Product</a>
-        
-        <div class="col-md-1" style="margin-left:5px">
-            <a class="btn btn-outline-success" asp-area="auth" asp-controller="product"
-               asp-action="Index" asp-route-storeId="@storeId">Show All</a>
-        </div>
-        @if (categories != null)
+<div>
+    <form asp-action="index" asp-controller="product" asp-area="auth" method="get">
+        <input type="type" name="productName" value="" placeholder="Search Product" />
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+</div>
+    <div class="text-center" id="categoryDiv">
+        @foreach (var category in categories as List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>)
         {
-            @foreach (var item in categories as List<WholeSaler.Web.Areas.Auth.Models.ViewModels.Category.CategoryVM>)
-            {
-                <div class="col-md-1">
-                    <a class="btn btn-outline-success" asp-area="auth" asp-controller="Product"
-                       asp-action="Index" asp-route-storeId="@storeId" asp-route-categoryId="@item.Id">
 
-                        @item.Name
-                    </a>
+            <div class="category" style="color:#ff7400;display: inline-block; position: relative;">
+                <span><a style="text-decoration:none" asp-controller="product" asp-action="index" asp-area="auth" asp-route-categoryId="@category.Id">@category.Name</a></span>
+                <div class="subcategory-container">
+                    @foreach (var subCategory in category.SubCategories)
+                    {
+                        <div class="subcategory">
+                            <a style="text-decoration:none" asp-controller="product" asp-action="index" asp-area="auth" asp-route-categoryId="@category.Id" asp-route-subCategoryId="@subCategory.Id"><span>@subCategory.Name</span></a>
+                        </div>
+                    }
                 </div>
-            }
+            </div>
         }
-
     </div>
 </div>
 
 <a asp-controller="product" asp-action="index">List Best Selling </a>
 <br />
 <a asp-controller="product" asp-action="index" asp-route-ascending="ascending">List Least Selling  </a>
-<table class="table">
+<a class="btn btn-primary" asp-action="SelectCategory" asp-controller="product" asp-area="auth" style="border-radius:50px;width:120px;height:40px;">Add Product</a>
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Resim</th>
@@ -93,7 +132,18 @@
                 <td id="productName"><a asp-action="previewProduct" asp-controller="product" asp-area="auth" asp-route-id="@prd.Id">@prd.Name</a></td>
                 <td id="productColour">@prd.Color</td>
                 <td id="productUnitPrice">@prd.UnitPrice TL</td>
-                <td id="productStock">@prd.Stock</td>
+                @if (prd.Stock > 5)
+                {
+                    <td id="productStock">@prd.Stock</td>
+                }
+                else if(prd.Stock<=0)
+                {
+                    <td id="productStock" style="background-color:red">@prd.Stock</td>
+                }
+                else
+                {
+                    <td id="productStock" style="background-color:yellow">@prd.Stock</td>
+                }
                 <td id="productSumOfSales">@prd.SumofSales</td>
                 <td>@(prd.SumofSales * prd.UnitPrice) TL</td>
                 <td id="productStatus">
@@ -124,3 +174,41 @@
     </tbody>
 </table>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const categories = document.querySelectorAll('.category');
+        const categoryDiv = document.getElementById('categoryDiv');
+        const productDiv = document.getElementById('productDiv');
+
+        categories.forEach(category => {
+            const subCategoryContainer = category.querySelector('.subcategory-container');
+
+            category.addEventListener('mouseover', function () {
+                subCategoryContainer.style.display = 'block';
+                productDiv.style.pointerEvents = "none";
+            });
+
+            category.addEventListener('mouseout', function (event) {
+                // Only hide the subcategory container if the mouse is not over it or its children
+                if (!category.contains(event.relatedTarget)) {
+                    subCategoryContainer.style.display = 'none';
+                    productDiv.style.pointerEvents = "auto";
+                }
+            });
+
+            subCategoryContainer.addEventListener('mouseover', function () {
+                subCategoryContainer.style.display = 'block';
+                productDiv.style.pointerEvents = "none";
+            });
+
+            subCategoryContainer.addEventListener('mouseout', function (event) {
+                // Only hide the subcategory container if the mouse is not over the category or its children
+                if (!category.contains(event.relatedTarget)) {
+                    subCategoryContainer.style.display = 'none';
+                    productDiv.style.pointerEvents = "auto";
+
+                }
+            });
+        });
+    });
+</script>

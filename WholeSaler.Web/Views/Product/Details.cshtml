@@ -81,7 +81,7 @@
                         <h5 class="card-title">@Model.Name</h5>
                         <p class="card-text">@Model.Description</p>
                         <p class="card-text"><small class="text-muted">@Model.Stock</small></p>
-                        <a href="" class="card-text"><small class="text-muted">@Model.Store.StoreName</small></a>
+                        <a href="/store/index?storeId=@Model.Store.StoreId" class="card-text"><small class="text-muted">@Model.Store.StoreName</small></a>
                     </div>
                     @if (userId == null)
                     {
@@ -279,11 +279,11 @@
             .then(data => {
                 const productFeaturesDiv = document.getElementById('productFeatures');
                 let htmlContent = `<h3>${data.name}</h3>`;
-                const excludeProperties = ['name', 'category', 'store', 'images', 'id', 'comments', 'updatedDate', 'createdDate', 'status'];
+                const excludeProperties = ['name', 'category', 'store', 'images', 'id', 'comments', 'updatedDate', 'createdDate', 'status','sumOfSales','description','quantity'];
 
                 for (const [key, value] of Object.entries(data)) {
                     if (!excludeProperties.includes(key)) { // Exclude specified properties
-                        htmlContent += `<p>${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}</p>`;
+                        htmlContent += `<p><b>${key.charAt(0).toUpperCase() + key.slice(1)}:</b> ${value}</p>`;
                     }
                 }
 

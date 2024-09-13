@@ -95,12 +95,12 @@ namespace WholeSaler.Web.Areas.Admin.Controllers
             if (errors.Any())
             {
                 ModelStateHelper.AddErrorsToModelState(ModelState, errors);
-                return View(errors);
+                return View(category);
             }
             var categoryEditUri = "https://localhost:7185/api/category/edit";
             var categoryJson = JsonConvert.SerializeObject(category);
             var categoryContent = new StringContent(categoryJson, System.Text.Encoding.UTF8, "application/json");
-            SetAuthHeader.SetAuthorizationHeader(_httpClient, Request);
+            //SetAuthHeader.SetAuthorizationHeader(Request);
             var response = await _httpClient.PutAsync(categoryEditUri, categoryContent);
             if (response.IsSuccessStatusCode)
             {

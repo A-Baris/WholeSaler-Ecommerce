@@ -7,9 +7,7 @@
 
 
 
-<p>
-    <a asp-action="index" asp-controller="home">Back to Index</a>
-</p>
+
 <table class="table">
     <thead>
         <tr>
@@ -33,24 +31,43 @@
     <tbody>
         @foreach (var item in Model)
         {
+            
             <tr>
                 <td>
                     <img src="~/images/orderBasket.jpg" alt="order" style="height:100px;width:100px;" />
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.CreatedDate)
+                   @item.CreatedDate
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.TotalOrderAmount)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Status)
+                   @item.TotalOrderAmount
                 </td>
 
+                @if(item.Status==WholeSaler.Web.Models.Enums.EntityStatus.Active)
+                {
+                    <td style="color:green;font-weight:bold">
+                        @item.Status
+                    </td>
+                }
+               @if (item.Status == WholeSaler.Web.Models.Enums.EntityStatus.Deleted)
+                {
+                    <td style="color:red;font-weight:bold">
+                       @item.Status
+                    </td>
+                }
+                @if (item.Status == WholeSaler.Web.Models.Enums.EntityStatus.Passive)
+                {
+                    <td style="color:gray;font-weight:bold">
+                        @item.Status
+                    </td>
+                }
+           
+                
 
                 <td>
 
-                    @Html.ActionLink("Details", "Details", new { orderId = item.Id })
+
+                    <a style="text-decoration:none" asp-action="details" asp-controller="order" asp-route-orderId="@item.Id"><b>Show Details</b></a>
 
                 </td>
             </tr>

@@ -8,6 +8,10 @@ namespace WholeSaler.Web.Areas.Auth.Views.Shared.Components.DynamicForm
         {
             return View("_DynamicForm", model);
         }
+        public IViewComponentResult InvokeForCreateFunction(object model)
+        {
+            return View("_DynamicFormForCreate", model);
+        }
 
 
     }

@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using WholeSaler.Entity.Entities.Embeds.Message;
 using WholeSaler.Entity.Entities.Embeds.Product;
+using WholeSaler.Entity.Entities.Enums;
 
 namespace WholeSaler.Entity.Entities
 {
-    public class Message:BaseEntity
+    public class Message: BaseEntity
     {
         public string ReceiverId { get; set; }  
         public string ReceiverName { get; set; }  
@@ -17,5 +18,6 @@ namespace WholeSaler.Entity.Entities
         public string? Header { get; set; }
         public string Body { get; set; }
         public List<MessageImage>? Images { get; set; }
+
     }
 }

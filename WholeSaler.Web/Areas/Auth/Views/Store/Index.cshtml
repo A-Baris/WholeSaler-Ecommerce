@@ -7,5 +7,54 @@
 
 }
 
-<h1>auth store index</h1>
+<table id="orderTable" border="1">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Created Date</th>
+            <th>Total Order Amount</th>
+        </tr>
+    </thead>
+    <tbody id="orderTableBody">
+    </tbody>
+</table>
 
+<script>
+    const socket = new WebSocket("wss://localhost:7185/ws/order");
+
+    socket.onopen = function (event) {
+        console.log("WebSocket connection established.");
+    };
+
+    // When a message is received from the server (API)
+    socket.onmessage = function (event) {
+        // Parse the received order data (assuming it's JSON)
+        const orderData = JSON.parse(event.data);
+        console.log(orderData);
+        // Get the table body element
+        const tableBody = document.getElementById('orderTable').querySelector('tbody');
+
+        // Clear the existing rows
+        tableBody.innerHTML = '';
+
+        // Loop through order data and add rows dynamically
+        orderData.forEach(order => {
+            const row = `<tr>
+                                <td>${order.Id}</td>
+                                <td>${order.CreatedDate}</td>
+                                <td>${order.TotalOrderAmount}</td>
+                             </tr>`;
+            tableBody.innerHTML += row;
+        });
+    };
+
+    // When the WebSocket is closed
+    socket.onclose = function (event) {
+        console.log("WebSocket connection closed.");
+    };
+
+    // If there is an error with the WebSocket
+    socket.onerror = function (error) {
+        console.error("WebSocket error:", error);
+    };
+</script>

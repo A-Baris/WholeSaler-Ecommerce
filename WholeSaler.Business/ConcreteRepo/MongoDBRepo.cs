@@ -32,6 +32,7 @@ namespace WholeSaler.Business.ConcreteRepo
         {
             try
             {
+                entity.CreatedDate = DateTime.Now;
                 await _collection.InsertOneAsync(entity);
                 _logger.LogInformation("Entity created successfully.");
                 return entity;
@@ -190,6 +191,7 @@ namespace WholeSaler.Business.ConcreteRepo
         {
             try
             {
+                entity.UpdatedDate = DateTime.Now;
                 var filter = Builders<T>.Filter.Eq("Id", entity.Id);
                 var existingEntity = await _collection.Find(filter).FirstOrDefaultAsync();
                 if (existingEntity != null)

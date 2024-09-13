@@ -13,6 +13,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using WholeSaler.Web.CustomMiddleWares;
 using WholeSaler.Web.Hubs;
 using WholeSaler.Web.Helpers.ProductHelper;
+using WholeSaler.Web.Helpers.HttpClientApiRequests;
+using PdfSharp.Charting;
+using WholeSaler.Web.WebSockets.Services;
+using System.Net.WebSockets;
+using WholeSaler.Web.WebSockets.EntityHandlers;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -23,15 +29,22 @@ builder.Services.AddIdentity<AppUser, AppRole>()
     .AddMongoDbStores<AppUser, AppRole, Guid>(
     mongoDbSettings.ConnectionString, mongoDbSettings.Name).AddDefaultTokenProviders();
 
-
-
-
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<IHttpApiRequest, HttpApiRequest>();
 builder.Services.AddControllersWithViews().AddFluentValidation(x => x.RegisterValidatorsFromAssemblyContaining<Program>());
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IProductFilterService,ProductFilterService>();
-
 builder.Services.AddTransient(typeof(IValidationService<>), typeof(ValidationService<>));
+
+builder.Services.Scan(scan => scan
+       .FromAssemblyOf<IWebSocketHandlerService>()
+       .AddClasses(classes => classes.AssignableTo<IWebSocketHandlerService>())
+       .AsImplementedInterfaces()
+       .WithSingletonLifetime());
+
+// WebSocketHandlerManager'ý da tekil bir servis olarak ekliyoruz
+builder.Services.AddSingleton<IWebSocketHandlerService,OrderWebSocketHandler>();
+builder.Services.AddSingleton<WebSocketHandlerManager>();
 
 builder.Services.AddHttpClient();
 
@@ -62,6 +75,44 @@ builder.Services.AddSession(options =>
 });
 var app = builder.Build();
 app.UseMiddleware<TokenMiddleware>();
+app.UseWebSockets();
+
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/ws")
+    {
+        if (context.WebSockets.IsWebSocketRequest)
+        {
+            WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+            var webSocketHandlerManager = app.Services.GetService<WebSocketHandlerManager>();
+
+            if (webSocketHandlerManager != null)
+            {
+                string requestPath = context.Request.Path; // ya da uygun bir string deðer al
+                await webSocketHandlerManager.HandleAsync(webSocket, requestPath);
+            }
+            else
+            {
+                context.Response.StatusCode = 500; // Internal Server Error
+                await context.Response.WriteAsync("WebSocketHandlerManager could not be found.");
+            }
+        }
+        else
+        {
+            context.Response.StatusCode = 400; // Bad Request
+            await context.Response.WriteAsync("This endpoint only accepts WebSocket requests.");
+        }
+    }
+    else
+    {
+        await next();
+    }
+});
+
+
+
+
+
 app.UseSession();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

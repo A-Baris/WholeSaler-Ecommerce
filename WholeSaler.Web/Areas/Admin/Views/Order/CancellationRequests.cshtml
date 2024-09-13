@@ -1,0 +1,52 @@
+﻿@model List<WholeSaler.Web.Areas.Admin.Models.ViewModels.Order.OrderForAdminVm>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+<h6>@DateTime.UtcNow</h6>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                User Id
+            </th>
+            <th>
+                Order Date
+            </th>
+            <th>
+                Title
+            </th>
+            <th>
+                Description
+            </th>
+
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.UserId
+                </td>
+                <td>
+                    @item.CreatedDate
+                </td>
+                <td>
+                    @item.CancellationRequest.Title
+                </td>
+                <td>
+                    @item.CancellationRequest.Description
+                </td>
+
+
+                <td>
+                    <button class="btn btn-success"><a asp-action="CancellationRequestConfirm" asp-controller="order" asp-area="admin" asp-route-orderId="@item.Id" asp-route-cartId="@item.ShoppingCartId">Confirm</a></button>
+                    <button class="btn btn-danger"><a asp-action="CancellationRequestReject" asp-controller="order" asp-area="admin" asp-route-orderId="@item.Id" asp-route-cartId="@item.ShoppingCartId">Reject</a></button>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

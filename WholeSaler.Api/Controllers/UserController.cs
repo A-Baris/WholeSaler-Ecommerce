@@ -38,6 +38,26 @@ namespace WholeSaler.Api.Controllers
         }
 
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            return Ok(user);
+        }
+
+        [HttpPut("edit/{userId}")]
+        public async Task<IActionResult> Edit(Adress adress,string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if(user.Addresses == null)
+            {
+                user.Addresses = new List<Adress>();
+            }
+            user.Addresses.Add(adress);
+            var result = await _userManager.UpdateAsync(user);
+            return Ok();
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDTO loginDto)
         {
@@ -80,8 +100,10 @@ namespace WholeSaler.Api.Controllers
                     PhoneNumber = registerDto.Phone
                 };
                 var result = await _userManager.CreateAsync(user,registerDto.Password);
+                 
                 if (result.Succeeded) 
                 {
+
                     return Ok("Register is successful");
                 }
                 else

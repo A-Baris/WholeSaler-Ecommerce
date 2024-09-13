@@ -1,4 +1,5 @@
 ﻿using WholeSaler.Web.Areas.Auth.Models.ViewModels.Product;
+using WholeSaler.Web.Models.Enums;
 
 namespace WholeSaler.Web.Models.ViewModels.ShoppingCartVM
 {
@@ -17,5 +18,6 @@ namespace WholeSaler.Web.Models.ViewModels.ShoppingCartVM
         public List<ProductImage>? Images { get; set; }
         public CategoryForCartVM? Category { get; set; }
         public StoreForCartVM? Store { get; set; }
+        public ProductOrderStatus? OrderStatus { get; set; }
     }
 }

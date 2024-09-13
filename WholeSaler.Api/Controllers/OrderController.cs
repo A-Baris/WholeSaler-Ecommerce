@@ -29,7 +29,7 @@ namespace WholeSaler.Api.Controllers
             _logger = logger;
             _mapper = mapper;
         }
-        [Authorize(Roles ="admin")]
+        //[Authorize(Roles = "admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -49,7 +49,7 @@ namespace WholeSaler.Api.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        [Authorize(Roles ="admin")]
+        //[Authorize(Roles ="admin")]
         [HttpPut("edit")]
         public async Task<IActionResult> Update(Order order)
         {

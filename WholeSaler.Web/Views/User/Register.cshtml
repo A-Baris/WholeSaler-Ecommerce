@@ -4,13 +4,17 @@
     ViewData["Title"] = "Register";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-
+<style>
+    .form-control {
+        border-radius: 2em !important;
+    }
+</style>
+<div class="container mt-5">
 <div class="row justify-content-center">
 
-    <div class="col-md-3">
-        <h5>Register</h5>
-        <form asp-action="Register">
+    <div class="col-md-6" style="background-color:#ff7400;border-radius: 2em;">
+       <div style="margin-top:5px">
+                <form asp-action="Register" asp-controller="user" method="post" onsubmit="return validateCode()">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Username" class="control-label"></label>
@@ -19,30 +23,105 @@
             </div>
             <div class="form-group">
                 <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
+                <input asp-for="Email" class="form-control" placeholder="abc@@abc.com" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
+                <input type="password" id="passwordInput" asp-for="Password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="PasswordConfirmed" class="control-label"></label>
-                <input asp-for="PasswordConfirmed" class="form-control" />
+                        <input type="password" id="passwordInput2" asp-for="PasswordConfirmed" class="form-control" />
                 <span asp-validation-for="PasswordConfirmed" class="text-danger"></span>
             </div>
+                    <button type="button" id="togglePassword" style="background-color:transparent;border:none;"> <i id="togglePassword" class="fa fa-eye"></i></button>
             <div class="form-group">
                 <label asp-for="Phone" class="control-label"></label>
-                <input asp-for="Phone" class="form-control" />
+                <input asp-for="Phone" class="form-control" placeholder="05XX XXX XX XX" />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
-            <div class="form-group" style="margin-top:5px">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                    <div class="form-group" style="width:30%;">
+                        <div class="row">
+                            <div style="width:80%;padding-right: 0px;">
+                                <label for="GeneratedCode">Verification Code</label>
+                                <input disabled type="text" id="GeneratedCode" class="form-control" value="" readonly style="2background-image: url('images\app\codepattern.jpg'); background-repeat: repeat;background-size: auto;" />
+                            </div>
+                            <div class="d-flex align-items-end" style="width:20%;padding-left: 0px;">
+                                <button type="button" id="refreshCode" style="background-color:transparent;border:none;">
+                                    <img src="~/images/app/refresh_icon.png" />
+                                </button>
+                            </div>
+                        </div>
+
+
+
+
+
+
+                    </div>
+                    <div class="form-group">
+                        <label for="UserInputCode">Enter the code</label>
+                        <input type="text" id="UserInputCode" class="form-control" style="width:25%" />
+                    </div>
+            <div class="form-group text-center" style="margin-top:5px;height:50px">
+                        <button type="submit" id="submitButton" class="btn btn-secondary" style="width:50%">Register</button>
             </div>
+                    <div id="resultMessage" style="margin-top: 10px;"></div>
         </form>
     </div>
+        </div>
 </div>
 
+</div>
 
+<script>
+    let generatedCode = '';
 
+    function generateRandomCode(length) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    function refreshCode() {
+        generatedCode = generateRandomCode(6);
+        document.getElementById('GeneratedCode').value = generatedCode;
+    }
+
+    // Sayfa yüklendiğinde ilk kodu üret
+    refreshCode();
+
+    document.getElementById('refreshCode').addEventListener('click', refreshCode);
+
+    function validateCode() {
+        const userInputCode = document.getElementById('UserInputCode').value;
+        const resultMessage = document.getElementById('resultMessage');
+
+        // Kodu kontrol et
+        if (userInputCode !== generatedCode) {
+            resultMessage.style.color = 'red';
+            resultMessage.textContent = 'Incorrect code, please try again.';
+            return false; // Formun submit olmasını durdur
+        }
+
+        // Kod doğruysa formu gönder
+        return true; // Formun submit olmasına izin ver
+    }
+    document.getElementById('togglePassword').addEventListener('click', function (e) {
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordInput2 = document.getElementById('passwordInput2');
+
+        if (passwordInput.type === "password" && passwordInput2.type === "password") {
+            passwordInput.type = "text";
+            passwordInput2.type = "text";
+        } else {
+            passwordInput.type = "password";
+            passwordInput2.type = "password";
+        }
+    });
+</script>

@@ -13,6 +13,7 @@ using WholeSaler.Web.Areas.Admin.Models.ViewModels.Store;
 using WholeSaler.Web.FluentValidation.Configs;
 using WholeSaler.Web.FluentValidation.Validators.User;
 using WholeSaler.Web.Helpers.EmailActions;
+using WholeSaler.Web.Helpers.HttpClientApiRequests;
 using WholeSaler.Web.Models.Entity;
 using WholeSaler.Web.Models.ViewModels;
 using WholeSaler.Web.Models.ViewModels.Message;
@@ -20,32 +21,25 @@ using WholeSaler.Web.Models.ViewModels.ShoppingCartVM;
 using WholeSaler.Web.Models.ViewModels.UserVM;
 using WholeSaler.Web.MongoIdentity;
 using static System.Net.WebRequestMethods;
-
 namespace WholeSaler.Web.Controllers
 {
     public class UserController : Controller
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IHttpApiRequest _httpApiRequest;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-
         private readonly IValidationService<RegisterVm> _registerValidation;
         private readonly IValidationService<LoginVM> _loginValidation;
-        private readonly HttpClient _httpClient;
-
-        public UserController(IHttpClientFactory httpClientFactory, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IValidationService<RegisterVm> registerValidation, IValidationService<LoginVM> loginValidation)
+        private readonly string userApiUri = "https://localhost:7185/api/user";
+        public UserController(IHttpApiRequest httpApiRequest,UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IValidationService<RegisterVm> registerValidation, IValidationService<LoginVM> loginValidation)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpApiRequest = httpApiRequest;
             _userManager = userManager;
             _signInManager = signInManager;
-
             _registerValidation = registerValidation;
             _loginValidation = loginValidation;
-            _httpClient = _httpClientFactory.CreateClient();
-
+            
         }
-
-
         public IActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
@@ -54,31 +48,20 @@ namespace WholeSaler.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginVM loginVM, string returnUrl)
         {
-
             var errors = _loginValidation.GetValidationErrors(loginVM);
             if (errors.Any())
             {
                 ModelStateHelper.AddErrorsToModelState(ModelState, errors);
-
                 return View(loginVM);
             }
-
-
-
             AppUser appUser = await _userManager.FindByEmailAsync(loginVM.Email);
             if (appUser != null)
             {
-                
                 var result = await _signInManager.PasswordSignInAsync(appUser, loginVM.Password, false, false);
-              
-
                 if (result.Succeeded)
-
                 {
-                    var getAccessTokenUri = "https://localhost:7185/api/user/login";
-                    var jsonAccessToken = JsonConvert.SerializeObject(loginVM);
-                    var contentAccessToken = new StringContent(jsonAccessToken, System.Text.Encoding.UTF8, "application/json");
-                    var responseToken = await _httpClient.PostAsync(getAccessTokenUri, contentAccessToken);
+                    var getAccessTokenUri = userApiUri+"/login";
+                    var responseToken = await _httpApiRequest.PostAsync(getAccessTokenUri, loginVM);
                     if (responseToken.IsSuccessStatusCode)
                     {
                       var tokenData =  await responseToken.Content.ReadFromJsonAsync<TokenVM>();
@@ -88,7 +71,6 @@ namespace WholeSaler.Web.Controllers
                             Secure = true,
                             Expires = tokenData.AccessTokenExpiration
                         });
-
                         Response.Cookies.Append("RefreshToken", tokenData.RefreshToken, new CookieOptions
                         {
                             HttpOnly = true,
@@ -96,64 +78,52 @@ namespace WholeSaler.Web.Controllers
                             Expires = tokenData.RefreshTokenExpiration
                         });
                     }
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    {
+                        return Redirect($"https://localhost:7189{returnUrl}");
+                    }
                     if (!string.IsNullOrEmpty(returnUrl))
                     {
-                        return Redirect("~/" + returnUrl);
+                        return Redirect($"https://localhost:7189/{returnUrl}");
                     }
-
                     var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                     var user = await _userManager.FindByIdAsync(userId);
-
                     var visitorId = Request.Cookies["visitor"];
                     var checkVisitorCartUri = $"https://localhost:7185/api/shoppingcart/getcart/{visitorId}";
-
-                    var responseVisitorCart = await _httpClient.GetAsync(checkVisitorCartUri);
+                    var responseVisitorCart = await _httpApiRequest.GetAsync(checkVisitorCartUri);
                     if (responseVisitorCart.IsSuccessStatusCode)
                     {
-                        var jsonString = await responseVisitorCart.Content.ReadAsStringAsync();
-                        var visitorshoppingCart = JsonConvert.DeserializeObject<ShoppingCartUpdateVM>(jsonString);
+                        var visitorshoppingCart = await _httpApiRequest.DeserializeJsonToModelForSingle<ShoppingCartUpdateVM>(responseVisitorCart);
                         if (visitorshoppingCart != null)
                         {
                             var checkCartLoginUserUri = $"https://localhost:7185/api/shoppingcart/getcart/{userId}";
-                            var userCart = await _httpClient.GetAsync(checkCartLoginUserUri);
+                            var userCart = await _httpApiRequest.GetAsync(checkCartLoginUserUri);
                             if (userCart.IsSuccessStatusCode)
                             {
                                 var jsonStringForUser = await userCart.Content.ReadAsStringAsync();
-                                var shoppingCartForUser = JsonConvert.DeserializeObject<ShoppingCartUpdateVM>(jsonStringForUser);
+                                var shoppingCartForUser = await _httpApiRequest.DeserializeJsonToModelForSingle<ShoppingCartUpdateVM>(userCart);
                                 if (shoppingCartForUser != null)
                                 {
                                     foreach (var item in visitorshoppingCart.Products)
                                     {
                                         shoppingCartForUser.Products.Add(item);
-
                                     }
                                     var userCartUpdate = "https://localhost:7185/api/shoppingcart/edit";
-
-                                    var jsonCartUpdate = JsonConvert.SerializeObject(shoppingCartForUser);
-                                    var contentCartUpdate = new StringContent(jsonCartUpdate, System.Text.Encoding.UTF8, "application/json");
-                                    var resultUpdateUserCart = await _httpClient.PutAsync(userCartUpdate, contentCartUpdate);
+                                    var resultUpdateUserCart = await _httpApiRequest.PutAsync(userCartUpdate, shoppingCartForUser);
                                     return RedirectToAction("Index", "Home");
                                 }
-
                             }
                             else
                             {
                                 var cartUpdateUri = "https://localhost:7185/api/shoppingcart/edit";
                                 visitorshoppingCart.UserId = userId;
-                                var jsonUpdate = JsonConvert.SerializeObject(visitorshoppingCart);
-                                var contentUpdate = new StringContent(jsonUpdate, System.Text.Encoding.UTF8, "application/json");
-                                var resultUpdateCart = await _httpClient.PutAsync(cartUpdateUri, contentUpdate);
+                                var resultUpdateCart = await _httpApiRequest.PutAsync(cartUpdateUri, visitorshoppingCart);
                                 return RedirectToAction("Index", "Home");
-
                             }
-
                         }
                     }
-
-
                     if (User.IsInRole("admin"))
                     {
-
                         return RedirectToAction("index", "user", new { area = "admin" });
                     }
                     var username = User.Identity.Name;
@@ -161,10 +131,9 @@ namespace WholeSaler.Web.Controllers
                     return RedirectToAction("Index", "Home");
                 }
             }
-
+            ViewBag.ErrorMessage = "Email or Password is wrong!";
             return View();
         }
-
         public IActionResult Register()
         {
             return View();
@@ -190,11 +159,8 @@ namespace WholeSaler.Web.Controllers
                 ModelState.AddModelError("Username", "This username is already using by another user");
                 return View(registerVm);
             }
-
-            var registerApiUri = "https://localhost:7185/api/user/register";
-            var jsonRegister = JsonConvert.SerializeObject(registerVm);
-            var contentRegister = new StringContent(jsonRegister, System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(registerApiUri,contentRegister);
+            var registerApiUri = userApiUri+"/register";
+            var response = await _httpApiRequest.PostAsync(registerApiUri,registerVm);
             if (response.IsSuccessStatusCode) 
             {
                 //var mailBody = $"Dear, {registerVm.Username} \nYou completed the registration.Now, you are already ready to enjoy and do shopping in the right address.";
@@ -202,24 +168,26 @@ namespace WholeSaler.Web.Controllers
                 TempData["registerSuccess"] = "Registered successfully";
                 return RedirectToAction("Login", "User");
             }
-            
-               
-          
-
             TempData["ErrorMessage"] = "An unexpected error, please try again";
             return View(registerVm);
         }
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
-            Response.Cookies.Delete("AccessToken");
-            Response.Cookies.Delete("RefreshToken");
-
-
-            return RedirectToAction("index", "home");
+            try
+            {
+                await _signInManager.SignOutAsync();
+                Response.Cookies.Delete("AccessToken");
+                Response.Cookies.Delete("RefreshToken");
+                return RedirectToAction("index", "home");
+            }
+            catch (Exception ex) 
+            {
+                TempData["ErrorMessage"] = "An unexpected error, please try again";
+                return RedirectToAction("index", "home");
+            }
+          
         }
-
         [HttpGet]
         public async Task<IActionResult> ChangePassword()
         {
@@ -228,20 +196,29 @@ namespace WholeSaler.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordVM changePasswordVM)
         {
-            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var user = await _userManager.FindByIdAsync(userId);
-            var changedPassword = await _userManager.ChangePasswordAsync(user,changePasswordVM.CurrentPassword,changePasswordVM.NewPassword);
-            if (changedPassword.Succeeded)
+            try
             {
-                TempData["SuccessMessage"] = "Password is changed successfully.\n Please login with new password";
-                await _signInManager.SignOutAsync();
-                Response.Cookies.Delete("AccessToken");
-                Response.Cookies.Delete("RefreshToken");
-                return RedirectToAction("login", "user");
+                var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var user = await _userManager.FindByIdAsync(userId);
+                var changedPassword = await _userManager.ChangePasswordAsync(user, changePasswordVM.CurrentPassword, changePasswordVM.NewPassword);
+                if (changedPassword.Succeeded)
+                {
+                    TempData["SuccessMessage"] = "Password is changed successfully.\n Please login with new password";
+                    await _signInManager.SignOutAsync();
+                    Response.Cookies.Delete("AccessToken");
+                    Response.Cookies.Delete("RefreshToken");
+                    return RedirectToAction("login", "user");
+                }
+                TempData["ErrorMessage"]= "An unexpected error, please try again";
+                return View(changedPassword);
             }
-            return View();
+            catch(Exception ex)
+            {
+                TempData["ErrorMessage"] = "An unexpected error, please try again";
+                return View();
+            }
+            
         }
-
         [HttpGet]
         public async Task<IActionResult> ForgotPassword()
         {
@@ -259,55 +236,42 @@ namespace WholeSaler.Web.Controllers
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var encodedToken = WebUtility.UrlEncode(token);
             string resetLink = Url.Action("ResetPassword", "user", new { userId = user.Id, token = encodedToken }, Request.Scheme);
-
             EmailSender.SendEMail(email, "Şifremi Unuttum", $"Şifre değiştirmek için linke tıklayınız:\n {resetLink}");
-
             TempData["SuccessMessage"] = $"{email} adresine şifre yenileme linki başarıyla gönderilmiştir";
             return RedirectToAction("ForgotPassword", "user");
-
         }
         [HttpGet]
         public async Task<IActionResult> ResetPassword(string userId, string token)
         {
-
             var resetVM = new ResetPasswordVM
             {
                 UserId = userId,
                 Token = token
             };
-
             return View(resetVM);
         }
-
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordVM resetVM)
         {
-
             var user = await _userManager.FindByIdAsync(resetVM.UserId);
-
             if (user == null)
             {
                 TempData["ErrorMessage"] = "Hatalı veya eksik erişim isteğiyle karşılaşıldı";
                 return RedirectToAction("index", "Home");
             }
-           
-
             var decodedToken = WebUtility.UrlDecode(resetVM.Token);
             var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetVM.Password);
-
             if (result.Succeeded)
             {
-                TempData["Message"] = "Şifre yenileme başarıyla gerçekleşmiştir.\n Bilgilerinizle tekrar giriş yapabilirsiniz";
-                return RedirectToAction("login", "Home");
+                TempData["SuccessMessage"] = "Şifre yenileme başarıyla gerçekleşmiştir.\n Bilgilerinizle tekrar giriş yapabilirsiniz";
+                return RedirectToAction("login", "user");
             }
             else
             {
-
                 TempData["ErrorMessage"] = "Beklenmedik bir hatayla karşılaşıldı lütfen tekrar deneyiniz veya yeniden şifre yenileme isteği gerçekleştiriniz";
                 return View(resetVM);
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> Mystore()
         {
@@ -316,7 +280,7 @@ namespace WholeSaler.Web.Controllers
             if (user.StoreId != null)
             {
                 var checkStoreUri = $"https://localhost:7185/api/store/{user.StoreId}";
-                var response = await _httpClient.GetAsync(checkStoreUri);
+                var response = await _httpApiRequest.GetAsync(checkStoreUri);
                 if (response.IsSuccessStatusCode) 
                 {
                     var storeJson = await response.Content.ReadAsStringAsync();
@@ -327,17 +291,21 @@ namespace WholeSaler.Web.Controllers
                     }
                 }
                 return RedirectToAction("applicationdetails","store");
-
+            }
+            else
+            {
+                var getStoresUri = "https://localhost:7185/api/store";
+                var storeResponse = await _httpApiRequest.GetAsync(getStoresUri);
+                if (storeResponse.IsSuccessStatusCode)
+                {
+                    var stores = await _httpApiRequest.DeserializeJsonToModelForList<StoreVM>(storeResponse);
+                    var userStore = stores.Where(x=>x.UserId==user.Id.ToString()).FirstOrDefault();
+                    return RedirectToAction("applicationdetails", "store");
+                }
             }
             return RedirectToAction("create", "store");
-            
         }
-
-
-
-
         //Message
-
         [HttpGet]
         public async Task<IActionResult> SendMessage(string receiverId,string receiverName)
         {
@@ -353,23 +321,14 @@ namespace WholeSaler.Web.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             sendMessageVM.SenderName = user.UserName;
             sendMessageVM.SenderId = userId.ToString();
-
             var messageCreateUri = "https://localhost:7185/api/message/create";
-            var messageJson = JsonConvert.SerializeObject(sendMessageVM);
-            var messageContent = new StringContent(messageJson, System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(messageCreateUri, messageContent);
+            var response = await _httpApiRequest.PostAsync(messageCreateUri, sendMessageVM);
             if(response.IsSuccessStatusCode)
             {
                 return RedirectToAction("index", "home");
             }
             return View(sendMessageVM);
         }
-
-
-
-
-
-
         [HttpGet]
         public async Task<IActionResult>MessageBox()
         {
@@ -377,15 +336,15 @@ namespace WholeSaler.Web.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             ViewBag.UserName = user.UserName;
             var receivedMessageUri = $"https://localhost:7185/api/message/messagebox/{user.UserName}/{user.Id}";
-            var response = await _httpClient.GetAsync(receivedMessageUri);
+            var response = await _httpApiRequest.GetAsync(receivedMessageUri);
             if (response.IsSuccessStatusCode) 
             { 
             var jsonData = await response.Content.ReadAsStringAsync();
-            var senders = JsonConvert.DeserializeObject<List<string>>(jsonData);
+            //var senders = JsonConvert.DeserializeObject<List<string>>(jsonData);
+                var senders = await _httpApiRequest.DeserializeJsonToModelForList<string>(response);
                 return View(senders);
             }
             return RedirectToAction("index", "home");
-           
         }
         [HttpGet]
         public async Task<IActionResult>ReceivedMessageFrom(string sender)
@@ -393,7 +352,7 @@ namespace WholeSaler.Web.Controllers
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var user = await _userManager.FindByIdAsync(userId);
             var receivedMessageUri = $"https://localhost:7185/api/message/receivedMessagefrom/{sender}/{user.UserName}";
-            var response = await _httpClient.GetAsync(receivedMessageUri);
+            var response = await _httpApiRequest.GetAsync(receivedMessageUri);
             if (response.IsSuccessStatusCode)
             {
                 ViewBag.ReceiverName = sender;
@@ -404,7 +363,15 @@ namespace WholeSaler.Web.Controllers
                 return PartialView(messages);
             }
             return RedirectToAction("index", "home");
-
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddAdress([FromBody] UserAddressCreateVm adressVM)
+        {
+          
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userEditApiUri = userApiUri + $"/edit/{userId}";
+            var response = await _httpApiRequest.PutAsync(userEditApiUri, adressVM);
+            return View();
         }
     }
 }

@@ -4,24 +4,16 @@
     Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
 
 }
-<h2>Edit Product</h2>
 
-<form asp-controller="product" asp-action="edit" asp-area="auth" method="post" enctype="multipart/form-data">
-    <div class="form-group">
-        <label>Product Images</label>
-        <input type="file" class="form-control" name="productImages" multiple>
-        <span class="text-muted">You should use "ctrl" to choose more than one image.</span>
-    </div>
+
+
  
+   
     @if (Model?.Type != null)
     {
         var partialViewName = $"~/Areas/Auth/Views/Shared/PartialViews/ProductUpdate/{Model.Type.ToLower()}.cshtml";
         @Html.Partial(partialViewName, Model);
     }
-    <div class="text-center">
+ 
 
-        <button type="submit" class="btn btn-primary" style="margin-top:10px">Edit</button>
-    </div>
-
-</form>
 

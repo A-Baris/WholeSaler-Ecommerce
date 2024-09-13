@@ -26,4 +26,8 @@
     <ProjectReference Include="..\WholeSaler.IOC\WholeSaler.IOC.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Helpers\WebSockets\" />
+  </ItemGroup>
+
 </Project>

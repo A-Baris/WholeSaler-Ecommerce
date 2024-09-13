@@ -14,6 +14,8 @@ using WholeSaler.Entity.Entities.MongoIdentity;
 using Microsoft.Extensions.Configuration;
 using WholeSaler.Api.MongoIdentity;
 using Microsoft.AspNetCore.Identity;
+using System.Net.WebSockets;
+
 
 
 
@@ -29,13 +31,21 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("MyCorsPolicy", builder =>
-    {
-        builder
-            .WithOrigins("https://localhost:7189")
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
+    //options.AddPolicy("MyCorsPolicy", builder =>
+    //{
+    //    builder
+    //        .WithOrigins("https://localhost:7189", "http://127.0.0.1:5500")
+    //        .AllowAnyMethod()
+    //        .AllowAnyHeader();
+    //});
+    options.AddPolicy("MyCorsPolicy",
+           builder =>
+           {
+               builder.WithOrigins("https://localhost:7189", "https://localhost:7185", "http://127.0.0.1:5500")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials(); // WebSocket baðlantýlarý için bu gerekli
+           });
 });
 
 
@@ -93,12 +103,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseRouting();
+app.UseCors("MyCorsPolicy");
+app.UseWebSockets();
+
+
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("MyCorsPolicy");
 
 app.MapControllers();
-app.UseRouting();
+
 
 
 app.Run();

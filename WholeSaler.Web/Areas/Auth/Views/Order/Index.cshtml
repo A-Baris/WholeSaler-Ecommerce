@@ -1,0 +1,125 @@
+﻿@model List<WholeSaler.Web.Models.ViewModels.OrderVM.OrderVM>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Auth/Views/Shared/_AuthLayout.cshtml";
+    string storeId = ViewBag.StoreId as string;
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="row border-bottom" >
+
+            <div class="col-md-2"><button id="activeButton" class="btn btn-primary">Show Active Orders</button></div>
+            <div class="col-md-2"><button id="passiveButton" class="btn btn-secondary">Show Passive Orders</button></div>
+        </div>
+   
+
+    </div>
+
+
+    <table id="orderTable" class="table table-striped border border-success" style="margin-top:auto">
+    <thead>
+    <tr>
+    <th>Order Date</th>
+    <th>Customer Name</th>
+    <th>Status</th>
+    <th></th>
+
+
+    </tr>
+    </thead>
+        <tbody id="orderTableBody">
+ 
+    </tbody>
+    </table>
+
+
+    </div>
+
+<script>
+    let socket;
+
+    // Function to initialize WebSocket connection with a specific status filter
+    function initializeWebSocket(status) {
+        if (socket) {
+            socket.close(); // Close existing connection if any
+        }
+
+        socket = new WebSocket("wss://localhost:7185/ws/order");
+
+        // When the WebSocket connection is established
+        socket.onopen = function (event) {
+            console.log("WebSocket connection established.");
+            // Send the filter status immediately after opening the connection
+            socket.send(JSON.stringify({ action: 'filter', status: status }));
+        };
+
+        // When a message is received from the server (API)
+        socket.onmessage = function (event) {
+            const orderData = JSON.parse(event.data);
+            console.log(orderData);
+
+            const tableBody = document.getElementById('orderTableBody');
+            tableBody.innerHTML = ''; // Clear the existing rows
+
+            // Loop through order data and add rows dynamically
+            orderData.forEach(order => {
+                let status;
+                if (order.Status === 0) {
+                    status = "Active";
+                } else if (order.Status === 1) {
+                    status = "Passive";
+                }
+                const createdDate = new Date(order.CreatedDate);
+
+                const day = String(createdDate.getDate()).padStart(2, '0');
+                const month = String(createdDate.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+                const year = createdDate.getFullYear();
+                const hours = String(createdDate.getHours()).padStart(2, '0');
+                const minutes = String(createdDate.getMinutes()).padStart(2, '0');
+                const seconds = String(createdDate.getSeconds()).padStart(2, '0');
+
+                const formattedDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+                const row = `<tr>
+                                        <td>${formattedDate}</td>
+                                    <td>${order.Username}</td>
+                                    <td>${status}</td>
+                                    <td><a class="btn btn-primary" href="/auth/order/orderdetail?orderId=${order.Id}">Order Detail</a></td>
+                                 </tr>`;
+                tableBody.innerHTML += row;
+            });
+        };
+
+        // When the WebSocket is closed
+        socket.onclose = function (event) {
+            console.log("WebSocket connection closed.");
+        };
+
+        // If there is an error with the WebSocket
+        socket.onerror = function (error) {
+            console.error("WebSocket error:", error);
+        };
+    }
+
+    // Button click event handlers to filter orders
+    document.getElementById('activeButton').addEventListener('click', () => {
+        initializeWebSocket('Active'); // Reinitialize WebSocket with 'Active' status
+    });
+
+    document.getElementById('passiveButton').addEventListener('click', () => {
+        initializeWebSocket('Passive'); // Reinitialize WebSocket with 'Passive' status
+    });
+
+    // Initialize WebSocket connection with default filter status on page load
+    window.onload = () => {
+        initializeWebSocket('Active'); // Set default filter status if needed
+    };
+</script>
+
+
+
+
+
+
+
+

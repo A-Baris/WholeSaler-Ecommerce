@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    string orderId = ViewBag.OrderId;
 }
 
 
@@ -12,10 +13,10 @@
         <thead>
             <tr>
                 <th></th>
-                <th>Ürün Adı</th>
-                <th>Renk</th>
-                <th>Ürün fiyat</th>
-                <th>Sipariş Adet</th>
+                <th>Name</th>
+                <th>Color</th>
+                <th>Unit Price</th>
+                <th>Quantity Of Order</th>
 
 
             </tr>
@@ -25,20 +26,20 @@
             {
 
                 <tr>
+                   
                     @if(prd.Images!=null)
                     {
-                        <td style="width:40px;height:40px"><img src="~/images/products/@prd.Images" style="width:60;height:80px"></td>
+                        <td style="width:80px;height:80px"><img src="~/images/products/@prd.Images[0].FileName" style="width:80px;height:80px"></td>
                     }
                     @if (prd.Images == null)
                     {
                         <td style="width:40px;height:40px"></td>
                     }
-                    
-                    <td>@prd.Name</td>
-                    <td>@prd.Color</td>
-                    <td>@prd.UnitPrice TL</td>
-                    <td>@prd.Quantity</td>
-                    
+
+                    <td style="vertical-align: middle;">@prd.Name</td>
+                    <td style="vertical-align: middle;">@prd.Color</td>
+                    <td style="vertical-align: middle;">@prd.UnitPrice TL</td>
+                    <td style="vertical-align: middle;">@prd.Quantity</td>
 
 
 
@@ -52,4 +53,6 @@
     </table>
 
 </div>
-
+<div>
+    <a class="btn btn-secondary" asp-action="ordercancellationrequest" asp-controller="order" asp-route-orderId="@orderId">Cancellation Order</a>
+</div>

@@ -69,7 +69,7 @@ namespace WholeSaler.Business.ConcreteRepo
                 var mongoDbEntity = await _mongoDB.GetAsync(id);
                 return mongoDbEntity;
             }
-            return null;
+            return default(T);
             
             
            
@@ -86,7 +86,7 @@ namespace WholeSaler.Business.ConcreteRepo
             }
             else
             {
-                return null;
+                return default(T);
             }
         }
 
@@ -100,7 +100,7 @@ namespace WholeSaler.Business.ConcreteRepo
             }
             else
             {
-                return null;
+                return default(T);
             }
         }
         public async Task<bool> ChangeStatusOfEntity(string id, int statusCode)
